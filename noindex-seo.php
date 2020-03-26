@@ -18,6 +18,20 @@
 // * Loads translation
 load_plugin_textdomain( 'noindex-seo', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
+$noindex_options = array(
+	'is_author'     => esc_html__( 'Author archives', 'noindex-seo' ),
+	'is_attachment' => esc_html__( 'Attachment archives', 'noindex-seo' ),
+	'is_date'       => esc_html__( 'Date', 'noindex-seo' ),
+	'is_year'       => esc_html__( 'Year', 'noindex-seo' ),
+	'is_month'      => esc_html__( 'Month archives', 'noindex-seo' ),
+	'is_day'        => esc_html__( 'Day archives', 'noindex-seo' ),
+	'is_time'       => esc_html__( 'Time archives', 'noindex-seo' ),
+	'is_archive'    => esc_html__( 'All archives', 'noindex-seo' ),
+	'is_search'     => esc_html__( 'Search pages', 'noindex-seo' ),
+	'is_paged'      => esc_html__( 'Pagination pages', 'noindex-seo' ),
+	'is_attachment' => esc_html__( 'Attachment pages', 'noindex-seo' ),
+	'is_preview'    => esc_html__( 'Preview pages', 'noindex-seo' ),
+);
 
 // * Includes Libraries for Noindex
 require_once dirname( __FILE__ ) . '/includes/class-options.php';
