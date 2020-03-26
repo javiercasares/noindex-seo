@@ -1,10 +1,13 @@
 === Noindex Pages ===
 Contributors: closemarketing, davidperez, javiercasares
-Tags: custom-admin
-Requires at least: 4.0
+Tags: custom-admin, seo, noindex
+Version: 0.1
+Requires at least: 5.0
+Requires PHP: 7.0
 Tested up to: 5.4
 Stable tag: 0.1
-Version: 0.1
+License: EUPL 1.2
+License URI: https://eupl.eu/1.2/en/
 
 Adjustments for no indexing pages.
 
