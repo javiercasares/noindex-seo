@@ -190,11 +190,11 @@ class NP_Frontend {
       FEED
     */
     if($enter && $noindex_pages_values['comment_feed'] && is_comment_feed()) {
-      echo '<meta name="robots" content="noindex">'."\n";
+      add_action( 'send_headers', 'noindex_pages_xrobots' );
       $enter = false;
     }
     if($enter && $noindex_pages_values['feed'] && is_feed()) {
-      echo '<meta name="robots" content="noindex">'."\n";
+      add_action( 'send_headers', 'noindex_pages_xrobots' );
       $enter = false;
     }
 
@@ -202,12 +202,16 @@ class NP_Frontend {
       ROBOTS
     */
     if($enter && $noindex_pages_values['robots'] && is_robots()) {
-      echo '<meta name="robots" content="noindex">'."\n";
+      add_action( 'send_headers', 'noindex_pages_xrobots' );
       $enter = false;
     }
     
     unset($enter, $noindex_pages_values);
-	} 
+	}
+
+	private function noindex_pages_xrobots() {
+    header( 'X-Robots-Tag: noindex' );
+  }  
 
 }
 
