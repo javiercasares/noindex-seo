@@ -97,7 +97,7 @@ class NP_Admin {
 		<form method="post" action="options.php">
 			<?php settings_fields( 'noindex_pages_settings' ); ?>
 			<?php do_settings_sections( 'noindex_pages_settings' ); ?>
-			<h2><?php esc_html_e( 'ERP Selections', 'noindex-seo' ); ?></h2>
+			<h2><?php esc_html_e( 'Options', 'noindex-seo' ); ?></h2>
 			<hr/>
 			<table class="form-table">
 				<tr valign="top">
