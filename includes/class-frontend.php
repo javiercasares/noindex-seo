@@ -22,9 +22,9 @@ class NP_Frontend {
 		add_action( 'wp_head', array( $this, 'noindex_pages_frontend' ) );
 	}
 
-	function noindex_pages_frontend() {
+	public function noindex_pages_frontend() {
 		if ( is_author() || is_date() || is_year() || is_month() || is_day() || is_time() || is_archive() || is_search() || is_paged() || is_attachment() || is_preview() ) {
-		  echo '<meta name="robots" content="noindex">';
+		  	echo '<meta name="robots" content="noindex">';
 		}
 	} 
 

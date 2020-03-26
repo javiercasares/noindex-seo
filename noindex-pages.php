@@ -21,3 +21,6 @@ load_plugin_textdomain( 'noindex-pages', false, dirname( plugin_basename( __FILE
 
 // * Includes Libraries for Noindex
 require_once dirname( __FILE__ ) . '/includes/class-options.php';
+
+// * Includes Libraries for Frontend
+require_once dirname( __FILE__ ) . '/includes/class-frontend.php';
