@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: Noindex Pages
- * Plugin URI: https://wordpress.org/plugins/noindex-pages/
+ * Plugin Name: Noindex SEO
+ * Plugin URI: https://wordpress.org/plugins/noindex-seo/
  * Description: .
  * Author: closemarketing
  * Author URI: https://www.closemarketing.es/
  * Version: 0.1
- * Text Domain: noindex-pages
+ * Text Domain: noindex-seo
  * Domain Path: /languages
  * License: GNU General Public License version 3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -16,7 +16,7 @@
 
 
 // * Loads translation
-load_plugin_textdomain( 'noindex-pages', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+load_plugin_textdomain( 'noindex-seo', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 
 // * Includes Libraries for Noindex

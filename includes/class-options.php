@@ -34,8 +34,8 @@ class NP_Admin {
 
 		add_submenu_page(
 			'options-general.php',
-			__( 'Software Connections', 'noindex-pages' ),
-			__( 'Connections', 'noindex-pages' ),
+			__( 'Software Connections', 'noindex-seo' ),
+			__( 'Connections', 'noindex-seo' ),
 			'manage_options',
 			'noindex_pages_settings',
 			array(
@@ -75,7 +75,7 @@ class NP_Admin {
 		}
 		$select_erp   .= '></option>';
 		$erp_selection = array(
-			'holded' => __( 'Holded', 'noindex-pages' ),
+			'holded' => __( 'Holded', 'noindex-seo' ),
 		);
 		foreach ( $erp_selection as $key => $value ) {
 			$select_erp .= '<option value="' . $key . '"';
@@ -92,7 +92,7 @@ class NP_Admin {
 		}
 		$select_project   .= '></option>';
 		$project_selection = array(
-			'asana' => __( 'Asana', 'noindex-pages' ),
+			'asana' => __( 'Asana', 'noindex-seo' ),
 		);
 		foreach ( $project_selection as $key => $value ) {
 			$select_project .= '<option value="' . $key . '"';
@@ -103,12 +103,12 @@ class NP_Admin {
 		}
 		?>
 		<div class="wrap">
-		<h1><?php esc_html_e( 'Software Connections', 'noindex-pages' ); ?></h1>
+		<h1><?php esc_html_e( 'Software Connections', 'noindex-seo' ); ?></h1>
 
 		<form method="post" action="options.php">
 			<?php settings_fields( 'noindex_pages_settings' ); ?>
 			<?php do_settings_sections( 'noindex_pages_settings' ); ?>
-			<h2><?php esc_html_e( 'ERP Selections', 'noindex-pages' ); ?></h2>
+			<h2><?php esc_html_e( 'ERP Selections', 'noindex-seo' ); ?></h2>
 			<hr/>
 			<table class="form-table">
 				<tr valign="top">
@@ -116,11 +116,11 @@ class NP_Admin {
 					<td><select name="botcamp_erp"><?php echo $select_erp; ?></select></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php esc_html_e( 'API Password', 'noindex-pages' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'API Password', 'noindex-seo' ); ?></th>
 					<td><input type="text" name="botcamp_erp_apipass" value="<?php echo esc_attr( get_option( 'botcamp_erp_apipass' ) ); ?>" style="min-width: 300px" /></td>
 				</tr>
 			</table>
-			<h2><?php esc_html_e( 'Projects Selections', 'noindex-pages' ); ?></h2>
+			<h2><?php esc_html_e( 'Projects Selections', 'noindex-seo' ); ?></h2>
 			<hr/>
 			<table class="form-table">
 				<tr valign="top">
@@ -128,7 +128,7 @@ class NP_Admin {
 					<td><select name="botcamp_project"><?php echo $select_project; ?></select></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php esc_html_e( 'API Password', 'noindex-pages' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'API Password', 'noindex-seo' ); ?></th>
 					<td><input type="text" name="botcamp_project_apipass" value="<?php echo esc_attr( get_option( 'botcamp_project_apipass' ) ); ?>" style="min-width: 300px" /></td>
 				</tr>
 			</table>
