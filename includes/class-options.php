@@ -9,11 +9,24 @@
  * @package  Admin
  */
 
+$noindex_options = array(
+	'is_author'     => esc_html__( 'Author archives', 'noindex-seo' ),
+	'is_attachment' => esc_html__( 'Attachment archives', 'noindex-seo' ),
+	'is_date'       => esc_html__( '', 'noindex-seo' ),
+	'is_year'       => esc_html__( '', 'noindex-seo' ),
+	'is_month'      => esc_html__( '', 'noindex-seo' ),
+	'is_day'        => esc_html__( '', 'noindex-seo' ),
+	'is_time'       => esc_html__( '', 'noindex-seo' ),
+	'is_archive'    => esc_html__( '', 'noindex-seo' ),
+	'is_search'     => esc_html__( '', 'noindex-seo' ),
+	'is_paged'      => esc_html__( '', 'noindex-seo' ),
+	'is_attachment' => esc_html__( '', 'noindex-seo' ),
+	'is_preview'    => esc_html__( '', 'noindex-seo' ),
+);
 /**
  * Class for admin fields
  */
 class NP_Admin {
-
 	/**
 	 * Construct of Class
 	 */
@@ -55,15 +68,12 @@ class NP_Admin {
 	 */
 	public function register_settings() {
 		// Register our settings.
-		register_setting( 'noindex_pages_settings', 'botcamp_erp' );
-		register_setting( 'noindex_pages_settings', 'botcamp_erp_apipass' );
-		register_setting( 'noindex_pages_settings', 'botcamp_project' );
-		register_setting( 'noindex_pages_settings', 'botcamp_project_apipass' );
+		register_setting( 'noindex_pages_settings', 'noindex_seo_type' );
 	}
 
 	private function select_table_html( $variable, $options ) {
 		$variable_value = get_option( $variable );
-		// Language.
+		// Construct HTML.
 		$html = '<select name="' . $variable . '"><option value=""';
 		if ( ! $variable_value ) {
 			$html .= ' selected';
@@ -99,7 +109,7 @@ class NP_Admin {
 			<hr/>
 			<table class="form-table">
 				<tr valign="top">
-					<th scope="row"><?php esc_html_e( 'Type of NoIndex', 'import-inmovilla-properties' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Type of NoIndex', 'noindex-seo' ); ?></th>
 					<td>
 						<?php
 						$this->select_table_html(
@@ -113,22 +123,40 @@ class NP_Admin {
 					</td>
 				</tr>
 			</table>
-			<?php 
-				if ( 'partial' === $noindex_seo_type ) { ?>
-					<h2><?php esc_html_e( 'Projects Selections', 'noindex-seo' ); ?></h2>
-					<hr/>
-					<table class="form-table">
-						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'Select Project', 'import-inmovilla-properties' ); ?></th>
-							<td><select name="botcamp_project"><?php echo $select_project; ?></select></td>
-						</tr>
-						<tr valign="top">
-							<th scope="row"><?php esc_html_e( 'API Password', 'noindex-seo' ); ?></th>
-							<td><input type="text" name="botcamp_project_apipass" value="<?php echo esc_attr( get_option( 'botcamp_project_apipass' ) ); ?>" style="min-width: 300px" /></td>
-						</tr>
-					</table>
+			<?php
+			if ( 'partial' === $noindex_seo_type ) {
+				?>
+				<h2><?php esc_html_e( 'Partial Settings for No indexation', 'noindex-seo' ); ?></h2>
+				<hr/>
+				<table class="form-table">
 					<?php
-				} ?> 
+					foreach ( $noindex_options as $key => $value ) {
+						echo '<tr valign="top"><th scope="row">';
+						esc_html_e( 'Type of NoIndex', 'noindex-seo' );
+						echo '</th><td>';
+						$this->select_table_html(
+							'noindex_' . $key,
+							array(
+								'total'   => __( 'All options recommended', 'noindex-seo' ),
+								'partial' => __( 'Partial selection', 'noindex-seo' ),
+							)
+						);
+						echo '</td></tr>';
+
+					}
+					?>
+					<tr valign="top">
+						<th scope="row"><?php esc_html_e( 'Select Project', 'noindex-seo' ); ?></th>
+						<td><select name="botcamp_project"><?php echo $select_project; ?></select></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php esc_html_e( 'API Password', 'noindex-seo' ); ?></th>
+						<td><input type="text" name="botcamp_project_apipass" value="<?php echo esc_attr( get_option( 'botcamp_project_apipass' ) ); ?>" style="min-width: 300px" /></td>
+					</tr>
+				</table>
+				<?php
+			}
+			?> 
 			<?php submit_button(); ?>
 		</form>
 		</div>
