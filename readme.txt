@@ -1,12 +1,15 @@
-=== Noindex Archives ===
-Contributors: closemarketing, davidperez, javiercasares
+=== noindex SEO ===
+Contributors: javiercasares, closemarketing, davidperez, jartes
 Tags: noindex, seo
-Requires at least: 4.0
+Version: 1.0.0
+Requires at least: 5.0
+Requires PHP: 7.0
 Tested up to: 5.4
-Stable tag: 0.1
-Version: 0.1
+Stable tag: 1.0.0
+License: EUPL 1.2
+License URI: https://eupl.eu/1.2/en/
 
-Adjustments for no indexing pages.
+Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
 
 == Description ==
 
@@ -17,19 +20,11 @@ Options for no indexing pages:
 
 == Installation ==
 
-Extract the zip file and just drop the contents in the wp-content/plugins/ directory of your
-WordPress installation and then activate the Plugin from Plugins page.
-
-
-== Developers ==
-[Official Repository Github](https://github.com/davidperezgar/noindex-pages)
+1. Use the Add New Plugin in the WordPress Admin area
+2. Activate the plugin through the Plugins menu in WordPress
+3. You can find the settings and documentation under Settings -> noindex
 
 == Changelog ==
 
 = 0.1 =
-*   First released.
-
-== Links ==
-
-*   [Closemarketing](https://www.closemarketing.es/)
-*   [Javier Casares](https://www.javiercasares.com/)
+* First version.
