@@ -1,18 +1,17 @@
 === noindex SEO ===
 Contributors: javiercasares, closemarketing, davidperez, jartes
 Tags: seo, noindex
-Requires: 4.9
-Tested: 5.7
+Requires at least: 4.9
+Tested: 5.8
 Requires PHP: 7.0
 Tested PHP: 8.0
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: EUPL 1.2
 License URI: https://eupl.eu/1.2/en/
 
 Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
 
 == Description ==
-
 Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
 
 Main pages
@@ -60,12 +59,13 @@ Error Page
 Important note: if you have any doubt about any of the following items it is best not to activate the option as you could lose results in the search engines.
 
 == Installation ==
-
 1. Use the Add New Plugin in the WordPress Admin area
 2. Activate the plugin through the Plugins menu in WordPress
 3. You can find the settings and documentation under Settings -> noindex
 
 == Changelog ==
+= 1.0.4 (2021-06-23) =
+* Compatibility: WordPress 5.8
 
 = 1.0.3 (2021-02-14) =
 * Compatibility: WordPress 5.7
