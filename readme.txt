@@ -1,11 +1,11 @@
 === noindex SEO ===
-Contributors: javiercasares, closemarketing, davidperez, jartes
+Contributors: javiercasares
 Tags: seo, noindex
 Requires at least: 4.9
-Tested: 5.8
-Requires PHP: 7.0
-Tested PHP: 8.0
-Stable tag: 1.0.4
+Tested: 5.9
+Requires PHP: 5.6.20
+Tested PHP: 8.1
+Stable tag: 1.0.5
 License: EUPL 1.2
 License URI: https://eupl.eu/1.2/en/
 
@@ -64,6 +64,10 @@ Important note: if you have any doubt about any of the following items it is bes
 3. You can find the settings and documentation under Settings -> noindex
 
 == Changelog ==
+
+= 1.0.5 (2021-07-03) =
+* Update the Plugin URI for WordPress 5.8
+
 = 1.0.4 (2021-06-23) =
 * Compatibility: WordPress 5.8
 
