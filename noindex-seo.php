@@ -3,9 +3,9 @@
 Plugin Name: noindex SEO
 Plugin URI: https://wordpress.org/plugins/noindex-seo/
 Description: Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
-Version: 1.0.5
+Version: 1.0.6
 Requires at least: 4.9
-Tested: 5.9
+Tested: 6.0
 Requires PHP: 5.6.20
 Tested PHP: 8.1
 Author: Javier Casares

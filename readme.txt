@@ -2,10 +2,10 @@
 Contributors: javiercasares
 Tags: seo, noindex
 Requires at least: 4.9
-Tested: 5.9
+Tested: 6.0
 Requires PHP: 5.6.20
 Tested PHP: 8.1
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: EUPL 1.2
 License URI: https://eupl.eu/1.2/en/
 
@@ -65,20 +65,30 @@ Important note: if you have any doubt about any of the following items it is bes
 
 == Changelog ==
 
-= 1.0.5 (2021-07-03) =
-* Update the Plugin URI for WordPress 5.8
+= 1.0.6 =
+* 2022-05-06
+* Compatibility: WordPress 6.0
 
-= 1.0.4 (2021-06-23) =
+= 1.0.5 =
+* 2021-11-05
+* Update the Plugin URI for WordPress 5.8
+* Compatibility: PHP 8.1
+
+= 1.0.4 =
+* 2021-06-23
 * Compatibility: WordPress 5.8
 
-= 1.0.3 (2021-02-14) =
+= 1.0.3 =
+* 2021-02-14
 * Compatibility: WordPress 5.7
 
-= 1.0.2 (2020-11-30) =
+= 1.0.2 =
+* 2020-11-30
 * Compatibility: WordPress 5.6
 * Compatibility: PHP 8.0
 
-= 1.0.1 (2020-07-22) =
+= 1.0.1 =
+* 2020-07-22
 * Compatibility: WordPress 5.5
 
 = 1.0.0 =
