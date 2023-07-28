@@ -3,11 +3,11 @@
 Plugin Name: noindex SEO
 Plugin URI: https://wordpress.org/plugins/noindex-seo/
 Description: Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
-Version: 1.0.7
-Requires at least: 4.9
-Tested: 6.1
-Requires PHP: 5.6.20
-Tested PHP: 8.1
+Version: 1.0.9
+Requires at least: 5.2
+Tested: 6.3
+Requires PHP: 7.0
+Tested PHP: 8.3
 Author: Javier Casares
 Author URI: https://www.javiercasares.com/
 License: EUPL 1.2
@@ -51,12 +51,12 @@ function noindex_seo_show()
   /*
     GLOBAL IMPORTANT PAGES
   */
-  if( $enter && $noindex_seo_values['front_page'] && is_front_page() )
+  if( $enter && $noindex_seo_values['front_page'] && function_exists( 'is_front_page' ) && is_front_page() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['home'] && is_home() )
+  if( $enter && $noindex_seo_values['home'] && function_exists( 'is_home' ) && is_home() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -65,22 +65,22 @@ function noindex_seo_show()
   /*
     PAGES / POSTS
   */
-  if( $enter && $noindex_seo_values['page'] && is_page() )
+  if( $enter && $noindex_seo_values['page'] && function_exists( 'is_page' ) && is_page() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['privacy_policy'] && is_privacy_policy() )
+  if( $enter && $noindex_seo_values['privacy_policy'] && function_exists( 'is_privacy_policy' ) && is_privacy_policy() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['single'] && is_single() )
+  if( $enter && $noindex_seo_values['single'] && function_exists( 'is_single' ) && is_single() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['singular'] && is_singular() )
+  if( $enter && $noindex_seo_values['singular'] && function_exists( 'is_singular' ) && is_singular() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -89,12 +89,12 @@ function noindex_seo_show()
   /*
     CATEGORIES / TAGS
   */
-  if( $enter && $noindex_seo_values['category'] && is_category() )
+  if( $enter && $noindex_seo_values['category'] && function_exists( 'is_category' ) && is_category() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['tag'] && is_tag() )
+  if( $enter && $noindex_seo_values['tag'] && function_exists( 'is_tag' ) && is_tag() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -103,27 +103,27 @@ function noindex_seo_show()
   /*
     DATES
   */
-  if( $enter && $noindex_seo_values['date'] && is_date() )
+  if( $enter && $noindex_seo_values['date'] && function_exists( 'is_date' ) && is_date() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['day'] && is_day() )
+  if( $enter && $noindex_seo_values['day'] && function_exists( 'is_day' ) && is_day() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['month'] && is_month() )
+  if( $enter && $noindex_seo_values['month'] && function_exists( 'is_month' ) && is_month() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['time'] && is_time() )
+  if( $enter && $noindex_seo_values['time'] && function_exists( 'is_time' ) && is_time() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['year'] && is_year() )
+  if( $enter && $noindex_seo_values['year'] && function_exists( 'is_year' ) && is_year() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -132,17 +132,17 @@ function noindex_seo_show()
   /*
     ARCHIVE
   */
-  if( $enter && $noindex_seo_values['archive'] && is_archive() )
+  if( $enter && $noindex_seo_values['archive'] && function_exists( 'is_archive' ) && is_archive() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['author'] && is_author() )
+  if( $enter && $noindex_seo_values['author'] && function_exists( 'is_author' ) && is_author() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['post_type_archive'] && is_post_type_archive() )
+  if( $enter && $noindex_seo_values['post_type_archive'] && function_exists( 'is_post_type_archive' ) && is_post_type_archive() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -151,7 +151,7 @@ function noindex_seo_show()
   /*
     PAGINATION
   */
-  if( $enter && $noindex_seo_values['paged'] && is_paged() )
+  if( $enter && $noindex_seo_values['paged'] && function_exists( 'is_paged' ) && is_paged() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -160,7 +160,7 @@ function noindex_seo_show()
   /*
     SEARCH
   */
-  if( $enter && $noindex_seo_values['search'] && is_search() )
+  if( $enter && $noindex_seo_values['search'] && function_exists( 'is_search' ) && is_search() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -169,7 +169,7 @@ function noindex_seo_show()
   /*
     ATTACHMENT
   */
-  if( $enter && $noindex_seo_values['attachment'] && is_attachment() )
+  if( $enter && $noindex_seo_values['attachment'] && function_exists( 'is_attachment' ) && is_attachment() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -178,12 +178,12 @@ function noindex_seo_show()
   /*
     PREVIEW
   */
-  if( $enter && $noindex_seo_values['customize_preview'] && is_customize_preview() )
+  if( $enter && $noindex_seo_values['customize_preview'] && function_exists( 'is_customize_preview' ) && is_customize_preview() )
   {
     noindex_seo_metarobots();
     $enter = false;
   }
-  if( $enter && $noindex_seo_values['preview'] && is_preview() )
+  if( $enter && $noindex_seo_values['preview'] && function_exists( 'is_preview' ) && is_preview() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -192,7 +192,7 @@ function noindex_seo_show()
   /*
     ERROR
   */
-  if( $enter && $noindex_seo_values['error'] && is_404() )
+  if( $enter && $noindex_seo_values['error'] && function_exists( 'is_404' ) && is_404() )
   {
     noindex_seo_metarobots();
     $enter = false;
@@ -202,14 +202,14 @@ function noindex_seo_show()
     FEED
   */
   /*
-  if( $enter && $noindex_seo_values['comment_feed'] && is_comment_feed() )
+  if( $enter && $noindex_seo_values['comment_feed'] && function_exists( 'is_comment_feed' ) && is_comment_feed() )
   {
     add_action( 'wp_headers', 'noindex_seo_xrobots' );
     $enter = false;
   }
   */
   /*
-  if( $enter && $noindex_seo_values['feed'] && is_feed() )
+  if( $enter && $noindex_seo_values['feed'] && function_exists( 'is_feed' ) && is_feed() )
   {
     add_action( 'wp_headers', 'noindex_seo_xrobots' );
     $enter = false;
@@ -220,7 +220,7 @@ function noindex_seo_show()
     ROBOTS
   */
   /*
-  if( $enter && $noindex_seo_values['robots'] && is_robots() )
+  if( $enter && $noindex_seo_values['robots'] && function_exists( 'is_robots' ) && is_robots() )
   {
     add_action( 'do_robotstxt', 'noindex_seo_xrobots' );
     $enter = false;
