@@ -3,9 +3,9 @@ Contributors: javiercasares
 Tags: seo, noindex
 Requires at least: 5.2
 Tested: 6.3
-Requires PHP: 7.0
+Requires PHP: 5.6
 Tested PHP: 8.3
-Stable tag: 1.0.9
+Stable tag: 1.0.10
 License: EUPL 1.2
 License URI: https://eupl.eu/1.2/en/
 
@@ -76,6 +76,11 @@ Important note: if you have any doubt about any of the following items it is bes
 3. You can find the settings and documentation under Settings -> noindex
 
 == Changelog ==
+
+= 1.0.10 =
+* 2023-09-10
+* WordPress Coding Standards 3.0.0 compatible.
+* Compatibility: PHP 5.6 - PHP 8.3.
 
 = 1.0.9 =
 * 2023-07-28
