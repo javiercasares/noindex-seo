@@ -233,10 +233,36 @@ function noindex_seo_settings_link( $links ) {
 	return $links;
 }
 
+/**
+ * Adds a 'noindex SEO' options page to the WordPress admin menu.
+ *
+ * This function creates an options page titled 'noindex SEO' within the WordPress admin dashboard.
+ * The page provides a UI for configuring settings related to the 'noindex SEO' functionality.
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ *
+ * @uses add_options_page()  Adds a new options page to the admin menu.
+ * @uses __()                 Retrieves a translated string.
+ */
 function noindex_seo_menu() {
 	add_options_page( __( 'noindex SEO', 'noindex-seo' ), __( 'noindex SEO', 'noindex-seo' ), 'manage_options', 'noindex_seo', 'noindex_seo_admin' );
 }
 
+/**
+ * Registers settings for the 'noindex SEO' plugin.
+ *
+ * This function registers a variety of settings associated with the 'noindex SEO' functionality in WordPress.
+ * Each setting determines whether specific pages or post types should be excluded from search engine indexing.
+ * The settings values are integers, with a default value of 0 (which typically represents 'false' or 'off' in boolean context).
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ *
+ * @uses register_setting()  Registers a setting and its data.
+ */
 function noindex_seo_register() {
 	register_setting(
 		'noindexseo',
@@ -440,6 +466,21 @@ function noindex_seo_register() {
 	);
 }
 
+/**
+ * Displays the administration settings page for the 'noindex SEO' plugin.
+ *
+ * This function provides the markup for the settings page of the plugin in the WordPress admin area.
+ * It shows the header for the settings, followed by the form that contains the settings fields.
+ * Each setting determines if specific pages or post types should be excluded from search engine indexing.
+ * The options are retrieved from the WordPress database and are displayed on the form.
+ *
+ * @since 1.0.0
+ *
+ * @return void
+ *
+ * @uses settings_fields()   Outputs nonce, action, and option_page fields for a settings page in the form.
+ * @uses get_option()        Retrieves option value based on option name from WordPress database.
+ */
 function noindex_seo_admin() {
 	?>
 		<div class="wrap">
@@ -585,7 +626,7 @@ function noindex_seo_admin() {
 			if ( $noindex_seo_front_page ) {
 				echo 'checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s front page.', 'noindex-seo' ); ?> <a href="<?php echo get_site_url(); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
+			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s front page.', 'noindex-seo' ); ?> <a href="<?php echo esc_url( get_site_url() ); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
 		</tr>
 		<tr>
 			<th scope="row"><label for="noindex_seo_home"><?php __( 'Home', 'noindex-seo' ); ?></label></th>
@@ -594,7 +635,7 @@ function noindex_seo_admin() {
 			if ( $noindex_seo_home ) {
 				echo 'checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s home page.', 'noindex-seo' ); ?> <a href="<?php echo get_home_url(); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
+			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s home page.', 'noindex-seo' ); ?> <a href="<?php echo esc_url( get_home_url() ); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
 		</tr>
 		</table>
 	
@@ -616,7 +657,7 @@ function noindex_seo_admin() {
 			if ( $noindex_seo_privacy_policy ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s privacy policy page.', 'noindex-seo' ); ?> <a href="<?php echo get_privacy_policy_url(); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
+			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s privacy policy page.', 'noindex-seo' ); ?> <a href="<?php echo esc_url( get_privacy_policy_url() ); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
 		</tr>
 		<tr>
 			<th scope="row"><label for="noindex_seo_single"><?php __( 'Single', 'noindex-seo' ); ?></label></th>
