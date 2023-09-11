@@ -5,7 +5,7 @@ Requires at least: 5.2
 Tested: 6.3
 Requires PHP: 5.6
 Tested PHP: 8.3
-Stable tag: 1.0.10
+Stable tag: 1.0.11
 License: EUPL 1.2
 License URI: https://eupl.eu/1.2/en/
 
@@ -76,6 +76,10 @@ Important note: if you have any doubt about any of the following items it is bes
 3. You can find the settings and documentation under Settings -> noindex
 
 == Changelog ==
+
+= 1.0.11 =
+* 2023-09-11
+* Fix showing all the text.
 
 = 1.0.10 =
 * 2023-09-10
