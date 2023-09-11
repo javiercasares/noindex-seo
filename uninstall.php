@@ -1,4 +1,10 @@
 <?php
+/**
+ * Uninstall the plugin.
+ *
+ * @package noindex-seo
+ */
+
 if ( defined( 'ABSPATH' ) && defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	delete_option( 'noindex_seo_error' );
 	delete_option( 'noindex_seo_archive' );

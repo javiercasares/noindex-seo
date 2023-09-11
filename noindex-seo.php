@@ -3,7 +3,7 @@
  * Plugin Name: noindex SEO
  * Plugin URI: https://wordpress.org/plugins/noindex-seo/
  * Description: Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
- * Version: 1.0.10
+ * Version: 1.0.11
  * Requires at least: 5.2
  * Tested: 6.3
  * Requires PHP: 5.6
@@ -32,6 +32,7 @@ defined( 'ABSPATH' ) || die( 'Bye bye!' );
  */
 function noindex_seo_show() {
 	global $post;
+	$enter              = true;
 	$noindex_seo_values = array(
 		'error'             => (bool) get_option( 'noindex_seo_error' ),
 		'archive'           => (bool) get_option( 'noindex_seo_archive' ),
@@ -59,11 +60,8 @@ function noindex_seo_show() {
 		'time'              => (bool) get_option( 'noindex_seo_time' ),
 		'year'              => (bool) get_option( 'noindex_seo_year' ),
 	);
-	$enter              = true;
 
-	/*
-	GLOBAL IMPORTANT PAGES
-	*/
+	// GLOBAL IMPORTANT PAGES.
 	if ( $enter && $noindex_seo_values['front_page'] && function_exists( 'is_front_page' ) && is_front_page() ) {
 		noindex_seo_metarobots();
 		$enter = false;
@@ -73,9 +71,7 @@ function noindex_seo_show() {
 		$enter = false;
 	}
 
-	/*
-	PAGES / POSTS
-	*/
+	// PAGES / POSTS.
 	if ( $enter && $noindex_seo_values['page'] && function_exists( 'is_page' ) && is_page() ) {
 		noindex_seo_metarobots();
 		$enter = false;
@@ -93,9 +89,7 @@ function noindex_seo_show() {
 		$enter = false;
 	}
 
-	/*
-	CATEGORIES / TAGS
-	*/
+	// CATEGORIES / TAGS.
 	if ( $enter && $noindex_seo_values['category'] && function_exists( 'is_category' ) && is_category() ) {
 		noindex_seo_metarobots();
 		$enter = false;
@@ -105,9 +99,7 @@ function noindex_seo_show() {
 		$enter = false;
 	}
 
-	/*
-	DATES
-	*/
+	// DATES.
 	if ( $enter && $noindex_seo_values['date'] && function_exists( 'is_date' ) && is_date() ) {
 		noindex_seo_metarobots();
 		$enter = false;
@@ -129,9 +121,7 @@ function noindex_seo_show() {
 		$enter = false;
 	}
 
-	/*
-	ARCHIVE
-	*/
+	// ARCHIVE.
 	if ( $enter && $noindex_seo_values['archive'] && function_exists( 'is_archive' ) && is_archive() ) {
 		noindex_seo_metarobots();
 		$enter = false;
@@ -145,33 +135,25 @@ function noindex_seo_show() {
 		$enter = false;
 	}
 
-	/*
-	PAGINATION
-	*/
+	// PAGINATION.
 	if ( $enter && $noindex_seo_values['paged'] && function_exists( 'is_paged' ) && is_paged() ) {
 		noindex_seo_metarobots();
 		$enter = false;
 	}
 
-	/*
-	SEARCH
-	*/
+	// SEARCH.
 	if ( $enter && $noindex_seo_values['search'] && function_exists( 'is_search' ) && is_search() ) {
 		noindex_seo_metarobots();
 		$enter = false;
 	}
 
-	/*
-	ATTACHMENT
-	*/
+	// ATTACHMENT.
 	if ( $enter && $noindex_seo_values['attachment'] && function_exists( 'is_attachment' ) && is_attachment() ) {
 		noindex_seo_metarobots();
 		$enter = false;
 	}
 
-	/*
-	PREVIEW
-	*/
+	// PREVIEW.
 	if ( $enter && $noindex_seo_values['customize_preview'] && function_exists( 'is_customize_preview' ) && is_customize_preview() ) {
 		noindex_seo_metarobots();
 		$enter = false;
@@ -181,9 +163,7 @@ function noindex_seo_show() {
 		$enter = false;
 	}
 
-	/*
-	ERROR
-	*/
+	// ERROR.
 	if ( $enter && $noindex_seo_values['error'] && function_exists( 'is_404' ) && is_404() ) {
 		noindex_seo_metarobots();
 		$enter = false;
@@ -229,7 +209,7 @@ add_action( 'admin_menu', 'noindex_seo_menu' );
  * @uses __()             Retrieves a translated string.
  */
 function noindex_seo_settings_link( $links ) {
-	$links[] = '<a href="' . get_admin_url( null, 'options-general.php?page=noindex_seo' ) . '">' . __( 'Settings' ) . '</a>';
+	$links[] = '<a href="' . get_admin_url( null, 'options-general.php?page=noindex_seo' ) . '">' . esc_html( __( 'Settings' ) ) . '</a>';
 	return $links;
 }
 
@@ -484,12 +464,12 @@ function noindex_seo_register() {
 function noindex_seo_admin() {
 	?>
 		<div class="wrap">
-		<h1><?php __( 'noindex SEO Settings', 'noindex-seo' ); ?></h1>
+		<h1><?php echo esc_html( __( 'noindex SEO Settings', 'noindex-seo' ) ); ?></h1>
 		<form method="post" action="options.php">
 	<?php
 	settings_fields( 'noindexseo' );
 	?>
-	<p><?php __( 'Important note: if you have any doubt about any of the following items it is best not to activate the option as you could lose results in the search engines.', 'noindex-seo' ); ?></p>
+	<p><?php echo esc_html( __( 'Important note: if you have any doubt about any of the following items it is best not to activate the option as you could lose results in the search engines.', 'noindex-seo' ) ); ?></p>
 	<?php
 	$noindex_seo_error = 0;
 	if ( (bool) get_option( 'noindex_seo_error' ) ) {
@@ -617,282 +597,245 @@ function noindex_seo_admin() {
 	}
 
 	?>
-			<h2><?php __( 'Main pages', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Main pages', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_front_page"><?php __( 'Front Page', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_front_page"><?php echo esc_html( __( 'Front Page', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_front_page" name="noindex_seo_front_page" value="1"
 			<?php
 			if ( $noindex_seo_front_page ) {
 				echo 'checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s front page.', 'noindex-seo' ); ?> <a href="<?php echo esc_url( get_site_url() ); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the site\'s front page.', 'noindex-seo' ) ); ?> <a href="<?php echo esc_url( get_site_url() ); ?>" target="_blank"><?php echo esc_html( __( 'View', 'noindex-seo' ) ); ?></a></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_home"><?php __( 'Home', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_home"><?php echo esc_html( __( 'Home', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_home" name="noindex_seo_home" value="1"
 			<?php
 			if ( $noindex_seo_home ) {
 				echo 'checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s home page.', 'noindex-seo' ); ?> <a href="<?php echo esc_url( get_home_url() ); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the site\'s home page.', 'noindex-seo' ) ); ?> <a href="<?php echo esc_url( get_home_url() ); ?>" target="_blank"><?php echo esc_html( __( 'View', 'noindex-seo' ) ); ?></a></span></fieldset></td>
 		</tr>
 		</table>
 	
-		<h2><?php __( 'Pages and Posts', 'noindex-seo' ); ?></h2>
+		<h2><?php echo esc_html( __( 'Pages and Posts', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_page"><?php __( 'Page', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_page"><?php echo esc_html( __( 'Page', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_page" name="noindex_seo_page" value="1"
 			<?php
 			if ( $noindex_seo_page ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s pages.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the site\'s pages.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_privacy_policy"><?php __( 'Privacy Policy', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_privacy_policy"><?php echo esc_html( __( 'Privacy Policy', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_privacy_policy" name="noindex_seo_privacy_policy" value="1"
 			<?php
 			if ( $noindex_seo_privacy_policy ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s privacy policy page.', 'noindex-seo' ); ?> <a href="<?php echo esc_url( get_privacy_policy_url() ); ?>" target="_blank"><?php __( 'View', 'noindex-seo' ); ?></a></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the site\'s privacy policy page.', 'noindex-seo' ) ); ?> <a href="<?php echo esc_url( get_privacy_policy_url() ); ?>" target="_blank"><?php echo esc_html( __( 'View', 'noindex-seo' ) ); ?></a></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_single"><?php __( 'Single', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_single"><?php echo esc_html( __( 'Single', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_single" name="noindex_seo_single" value="1"
 			<?php
 			if ( $noindex_seo_single ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of a post on the site.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of a post on the site.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_singular"><?php __( 'Singular', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_singular"><?php echo esc_html( __( 'Singular', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_singular" name="noindex_seo_singular" value="1"
 			<?php
 			if ( $noindex_seo_singular ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of a post or a page of the site.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of a post or a page of the site.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
 
-			<h2><?php __( 'Taxonomies', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Taxonomies', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_category"><?php __( 'Category', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_category"><?php echo esc_html( __( 'Category', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_category" name="noindex_seo_category" value="1"
 			<?php
 			if ( $noindex_seo_category ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site categories. The lists where the posts appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the site categories. The lists where the posts appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_tag"><?php __( 'Tag', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_tag"><?php echo esc_html( __( 'Tag', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_tag" name="noindex_seo_tag" value="1"
 			<?php
 			if ( $noindex_seo_tag ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the site\'s tags. The lists where the posts appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the site\'s tags. The lists where the posts appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
 
-			<h2><?php __( 'Dates', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Dates', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_date"><?php __( 'Date', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_date"><?php echo esc_html( __( 'Date', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_date" name="noindex_seo_date" value="1"
 			<?php
 			if ( $noindex_seo_date ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing when any date-based archive page (i.e. a monthly, yearly, daily or time-based archive) of the site. The lists where the posts appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing when any date-based archive page (i.e. a monthly, yearly, daily or time-based archive) of the site. The lists where the posts appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_day"><?php __( 'Day', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_day"><?php echo esc_html( __( 'Day', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_day" name="noindex_seo_day" value="1"
 			<?php
 			if ( $noindex_seo_day ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing when a daily archive of the site. The lists where the posts appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing when a daily archive of the site. The lists where the posts appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_month"><?php __( 'Month', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_month"><?php echo esc_html( __( 'Month', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_month" name="noindex_seo_month" value="1"
 			<?php
 			if ( $noindex_seo_month ) {
-				echo ' checked';}
+				echo ' checked';
+			}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing when a monthly archive of the site. The lists where the posts appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing when a monthly archive of the site. The lists where the posts appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_time"><?php __( 'Time', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_time"><?php echo esc_html( __( 'Time', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_time" name="noindex_seo_time" value="1"
 			<?php
 			if ( $noindex_seo_time ) {
-				echo ' checked';}
+				echo ' checked';
+			}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing when an hourly, "minutely", or "secondly" archive of the site. The lists where the posts appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing when an hourly, "minutely", or "secondly" archive of the site. The lists where the posts appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_year"><?php __( 'Year', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_year"><?php echo esc_html( __( 'Year', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_year" name="noindex_seo_year" value="1"
 			<?php
 			if ( $noindex_seo_year ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing when a yearly archive of the site. The lists where the posts appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing when a yearly archive of the site. The lists where the posts appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
 
-			<h2><?php __( 'Archives', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Archives', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_archive"><?php __( 'Archive', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_archive"><?php echo esc_html( __( 'Archive', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_archive" name="noindex_seo_archive" value="1"
 			<?php
 			if ( $noindex_seo_archive ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of any type of Archive page. Category, Tag, Author and Date based pages are all types of Archives. The lists where the posts appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of any type of Archive page. Category, Tag, Author and Date based pages are all types of Archives. The lists where the posts appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_author"><?php __( 'Author', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_author"><?php echo esc_html( __( 'Author', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_author" name="noindex_seo_author" value="1"
 			<?php
 			if ( $noindex_seo_author ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of the author\'s page, where the author\'s publications appear.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the author\'s page, where the author\'s publications appear.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_post_type_archive"><?php __( 'Post Type Archive', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_post_type_archive"><?php echo esc_html( __( 'Post Type Archive', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_post_type_archive" name="noindex_seo_post_type_archive" value="1"
 			<?php
 			if ( $noindex_seo_post_type_archive ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php __( 'This will block the indexing of any post type page.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of any post type page.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
 
-			<h2><?php __( 'Pagination', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Pagination', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_paged"><?php __( 'Pagination', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_paged"><?php echo esc_html( __( 'Pagination', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_paged" name="noindex_seo_paged" value="1"
 			<?php
 			if ( $noindex_seo_paged ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing of the pagination, i.e. all pages other than the main page of an archive.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the pagination, i.e. all pages other than the main page of an archive.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
 
-			<h2><?php __( 'Search', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Search', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_search"><?php __( 'Search', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_search"><?php echo esc_html( __( 'Search', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_search" name="noindex_seo_search" value="1"
 			<?php
 			if ( $noindex_seo_search ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing of the internal search result pages.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the internal search result pages.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
 
-			<h2><?php __( 'Attachments', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Attachments', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_attachment"><?php __( 'Attachment', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_attachment"><?php echo esc_html( __( 'Attachment', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_attachment" name="noindex_seo_attachment" value="1"
 			<?php
 			if ( $noindex_seo_attachment ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing of an attachment document to a post or page. An attachment is an image or other file uploaded through the post editor\'s upload utility. Attachments can be displayed on their own "page" or template. This will not cause the indexing of the image or file to be blocked.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of an attachment document to a post or page. An attachment is an image or other file uploaded through the post editor\'s upload utility. Attachments can be displayed on their own "page" or template. This will not cause the indexing of the image or file to be blocked.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
 
-			<h2><?php __( 'Previews', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Previews', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_customize_preview"><?php __( 'Customize Preview', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_customize_preview"><?php echo esc_html( __( 'Customize Preview', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_customize_preview" name="noindex_seo_customize_preview" value="1"
 			<?php
 			if ( $noindex_seo_customize_preview ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing when a content is being displayed in customize mode.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing when a content is being displayed in customize mode.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		<tr>
-			<th scope="row"><label for="noindex_seo_preview"><?php __( 'Preview', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_preview"><?php echo esc_html( __( 'Preview', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_preview" name="noindex_seo_preview" value="1"
 			<?php
 			if ( $noindex_seo_preview ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will block the indexing when a single post is being displayed in draft mode.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing when a single post is being displayed in draft mode.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
 
-			<h2><?php __( 'Error Page', 'noindex-seo' ); ?></h2>
+			<h2><?php echo esc_html( __( 'Error Page', 'noindex-seo' ) ); ?></h2>
 		<table class="form-table">
 		<tr>
-			<th scope="row"><label for="noindex_seo_error"><?php __( 'Error 404', 'noindex-seo' ); ?></label></th>
+			<th scope="row"><label for="noindex_seo_error"><?php echo esc_html( __( 'Error 404', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_error" name="noindex_seo_error" value="1"
 			<?php
 			if ( $noindex_seo_error ) {
 				echo ' checked';}
 			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'This will cause an error page to be blocked from being indexed. As it is an error page, it should not be indexed per se, but just in case.', 'noindex-seo' ); ?></span></fieldset></td>
+			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will cause an error page to be blocked from being indexed. As it is an error page, it should not be indexed per se, but just in case.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
 		</table>
-	   
-		<!--
-			<h2><?php __( 'Feeds (RSS, Atom)', 'noindex-seo' ); ?></h2>
-		<table class="form-table">
-		<tr>
-			<th scope="row"><label for="noindex_seo_comment_feed"><?php __( 'Comment feed', 'noindex-seo' ); ?></label></th>
-			<td><fieldset><input type="checkbox" id="noindex_seo_comment_feed" name="noindex_seo_comment_feed" value="1"
-			<?php
-			if ( $noindex_seo_comment_feed ) {
-				echo ' checked';}
-			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'Comment feeds should not be indexed if they are properly configured, as they are not HTML pages but XML pages. Even so, in case they could somehow be in the results, it will not show them. This will not prevent them from being read by crawlers, only that it does not show them in the results.', 'noindex-seo' ); ?></span></fieldset></td>
-		</tr>
-		<tr>
-			<th scope="row"><label for="noindex_seo_feed"><?php __( 'Feed', 'noindex-seo' ); ?></label></th>
-			<td><fieldset><input type="checkbox" id="noindex_seo_feed" name="noindex_seo_feed" value="1"
-			<?php
-			if ( $noindex_seo_feed ) {
-				echo ' checked';}
-			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'Feeds should not be indexed if they are properly configured, as they are not HTML pages but XML pages. Even so, in case they could somehow be in the results, it will not show them. This will not prevent them from being read by crawlers, only that it does not show them in the results.', 'noindex-seo' ); ?></span></fieldset></td>
-		</tr>
-		</table>
-		-->
-
-		<!--
-			<h2><?php __( 'robots.txt', 'noindex-seo' ); ?></h2>
-		<table class="form-table">
-		<tr>
-			<th scope="row"><label for="noindex_seo_robots"><?php __( 'robots.txt', 'noindex-seo' ); ?></label></th>
-			<td><fieldset><input type="checkbox" id="noindex_seo_robots" name="noindex_seo_robots" value="1"
-			<?php
-			if ( $noindex_seo_robots ) {
-				echo ' checked';}
-			?>
-			> <?php __( 'Recommended', 'noindex-seo' ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php __( 'The robots.txt file should not appear in the search results, but there may be the odd case where it does. With this option you can force it not to, although the crawlers will still read it and process it, only they won\'t show up in the results.', 'noindex-seo' ); ?></span></fieldset></td>
-		</tr>
-		</table>
-		-->
 
 			<?php submit_button(); ?>
 		</form>
