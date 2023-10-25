@@ -1,6 +1,6 @@
 <?php
 /**
- * Uninstall the plugin.
+ * Uninstall the plugin. Compatible with 1.0.12.
  *
  * @package noindex-seo
  */
