@@ -35,16 +35,66 @@ function noindex_seo_metarobots() {
 /**
  * Retrieves and sets the SEO 'noindex' values for various WordPress contexts.
  *
+ * This function optimizes option retrieval by fetching all relevant settings at once
+ * using transient caching, reducing the number of database queries.
+ *
  * @global WP_Post $post The post global for the current post, if within The Loop.
  *
- * @return void
+ * @return void.
  *
- * @since 1.0.0
+ * @since 1.1.0.
  */
 function noindex_seo_show() {
 	global $post;
 
-	$noindex_seo_values = array(
+	// Intentar obtener las opciones desde el transiente.
+	$options = get_transient( 'noindex_seo_options' );
+
+	if ( false === $options ) {
+		// Transiente no establecido, recuperar opciones de la base de datos.
+		$options = get_option( 'noindexseo', array() );
+
+		// Establecer el transiente por 1 hora para almacenar en caché las opciones.
+		set_transient( 'noindex_seo_options', $options, HOUR_IN_SECONDS );
+	}
+
+	/**
+	 * Filtrar los contextos y las claves de opciones correspondientes utilizadas para noindex.
+	 *
+	 * @since 1.0.0.
+	 *
+	 * @param array $contexts Array asociativo de contexto => clave_opción.
+	 */
+	$contexts = apply_filters(
+		'noindex_seo_contexts',
+		array(
+			'front_page'        => 'noindex_seo_front_page',
+			'home'              => 'noindex_seo_home',
+			'page'              => 'noindex_seo_page',
+			'privacy_policy'    => 'noindex_seo_privacy_policy',
+			'single'            => 'noindex_seo_single',
+			'singular'          => 'noindex_seo_singular',
+			'category'          => 'noindex_seo_category',
+			'tag'               => 'noindex_seo_tag',
+			'date'              => 'noindex_seo_date',
+			'day'               => 'noindex_seo_day',
+			'month'             => 'noindex_seo_month',
+			'time'              => 'noindex_seo_time',
+			'year'              => 'noindex_seo_year',
+			'archive'           => 'noindex_seo_archive',
+			'author'            => 'noindex_seo_author',
+			'post_type_archive' => 'noindex_seo_post_type_archive',
+			'paged'             => 'noindex_seo_paged',
+			'search'            => 'noindex_seo_search',
+			'attachment'        => 'noindex_seo_attachment',
+			'customize_preview' => 'noindex_seo_customize_preview',
+			'preview'           => 'noindex_seo_preview',
+			'error'             => 'noindex_seo_error',
+		)
+	);
+
+	// Definir condiciones actuales.
+	$current_conditions = array(
 		'front_page'        => is_front_page(),
 		'home'              => is_home(),
 		'page'              => is_page(),
@@ -69,15 +119,22 @@ function noindex_seo_show() {
 		'error'             => is_404(),
 	);
 
-	foreach ( $noindex_seo_values as $key => $condition ) {
-		if ( $condition && (bool) get_option( 'noindex_seo_' . $key ) ) {
+	// Iterar a través de los contextos y aplicar 'noindex' si la condición y la configuración son verdaderas.
+	foreach ( $contexts as $context => $option_key ) {
+		if (
+			isset( $current_conditions[ $context ] ) &&
+			$current_conditions[ $context ] &&
+			isset( $options[ $option_key ] ) &&
+			(bool) $options[ $option_key ]
+		) {
 			noindex_seo_metarobots();
-			break; // Prevent multiple meta tags from being added.
+			break; // Evitar que se agreguen múltiples meta tags.
 		}
 	}
 
-	unset( $noindex_seo_values );
+	unset( $contexts, $options, $current_conditions );
 }
+
 
 add_action( 'wp_head', 'noindex_seo_show' );
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'noindex_seo_settings_link' );
@@ -118,6 +175,10 @@ function noindex_seo_menu() {
 
 /**
  * Registers settings for the 'noindex SEO' plugin.
+ *
+ * This function registers a variety of settings associated with the 'noindex SEO' functionality in WordPress.
+ * Each setting determines whether specific pages or post types should be excluded from search engine indexing.
+ * The settings values are integers, with a default value of 0 (which typically represents 'false' or 'off' in boolean context).
  *
  * @since 1.0.0
  *
@@ -162,7 +223,62 @@ function noindex_seo_register() {
 			)
 		);
 	}
+
+	// Hook to settings update to clear transient cache.
+	add_action( 'update_option_noindexseo', 'noindex_seo_clear_transient', 10, 2 );
 }
+
+/**
+ * Clears the transient cache when settings are updated.
+ *
+ * @return void
+ */
+function noindex_seo_clear_transient() {
+	delete_transient( 'noindex_seo_options' );
+}
+
+/**
+ * Detects conflicting SEO plugins and notifies the administrator.
+ *
+ * This function checks if any known conflicting SEO plugins are active.
+ * If a conflict is detected, it displays an admin notice warning the user.
+ *
+ * @since 1.1.0.
+ *
+ * @return void.
+ */
+function noindex_seo_detect_conflicts() {
+	// Incluir el archivo plugin.php si la función no está disponible.
+	if ( ! function_exists( 'is_plugin_active' ) ) {
+		include_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
+
+	// Definir un array asociativo de plugins conflictivos: slug/fichero => nombre real del plugin.
+	$conflicting_plugins = array(
+		'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
+		'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO Pack',
+		// Añadir otros plugins SEO conflictivos según sea necesario.
+	);
+
+	// Iterar a través de los plugins conflictivos para verificar si alguno está activo.
+	foreach ( $conflicting_plugins as $plugin_path => $plugin_name ) {
+		if ( is_plugin_active( $plugin_path ) ) {
+			// Añadir una notificación de administrador si se detecta un plugin conflictivo activo.
+			add_action(
+				'admin_notices',
+				function () use ( $plugin_name ) {
+					echo '<div class="notice notice-warning is-dismissible"><p>';
+					// translators: plugin name.
+					printf( esc_html__( 'noindex SEO ha detectado que %s está activo. Esto puede causar conflictos. Por favor, configura las opciones en consecuencia.', 'noindex-seo' ), esc_html( $plugin_name ) );
+					echo '</p></div>';
+				}
+			);
+			break; // Detener la verificación después de encontrar el primer conflicto.
+		}
+	}
+}
+
+add_action( 'admin_init', 'noindex_seo_detect_conflicts' );
 
 /**
  * Displays the administration settings page for the 'noindex SEO' plugin.
