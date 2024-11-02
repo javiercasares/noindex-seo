@@ -47,23 +47,23 @@ function noindex_seo_metarobots() {
 function noindex_seo_show() {
 	global $post;
 
-	// Intentar obtener las opciones desde el transiente.
+	// Try to get the options from the transient.
 	$options = get_transient( 'noindex_seo_options' );
 
 	if ( false === $options ) {
-		// Transiente no establecido, recuperar opciones de la base de datos.
+		// Transient not set, retrieve options from the database.
 		$options = get_option( 'noindexseo', array() );
 
-		// Establecer el transiente por 1 hora para almacenar en caché las opciones.
+		// Set the transient for 1 hour to cache the options.
 		set_transient( 'noindex_seo_options', $options, HOUR_IN_SECONDS );
 	}
 
 	/**
-	 * Filtrar los contextos y las claves de opciones correspondientes utilizadas para noindex.
+	 * Filter the contexts and corresponding option keys used for noindex.
 	 *
 	 * @since 1.0.0.
 	 *
-	 * @param array $contexts Array asociativo de contexto => clave_opción.
+	 * @param array $contexts Associative array of context => option_key.
 	 */
 	$contexts = apply_filters(
 		'noindex_seo_contexts',
@@ -93,7 +93,7 @@ function noindex_seo_show() {
 		)
 	);
 
-	// Definir condiciones actuales.
+	// Define current conditions.
 	$current_conditions = array(
 		'front_page'        => is_front_page(),
 		'home'              => is_home(),
@@ -119,7 +119,7 @@ function noindex_seo_show() {
 		'error'             => is_404(),
 	);
 
-	// Iterar a través de los contextos y aplicar 'noindex' si la condición y la configuración son verdaderas.
+	// Iterate through the contexts and apply 'noindex' if the condition and setting are true.
 	foreach ( $contexts as $context => $option_key ) {
 		if (
 			isset( $current_conditions[ $context ] ) &&
@@ -128,13 +128,12 @@ function noindex_seo_show() {
 			(bool) $options[ $option_key ]
 		) {
 			noindex_seo_metarobots();
-			break; // Evitar que se agreguen múltiples meta tags.
+			break; // Prevent multiple meta tags from being added.
 		}
 	}
 
 	unset( $contexts, $options, $current_conditions );
 }
-
 
 add_action( 'wp_head', 'noindex_seo_show' );
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'noindex_seo_settings_link' );
@@ -248,12 +247,12 @@ function noindex_seo_clear_transient() {
  * @return void.
  */
 function noindex_seo_detect_conflicts() {
-	// Incluir el archivo plugin.php si la función no está disponible.
+	// Include the plugin.php file if the function is not available.
 	if ( ! function_exists( 'is_plugin_active' ) ) {
 		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
 
-	// Definir un array asociativo de plugins conflictivos: slug/fichero => nombre real del plugin.
+	// Define an associative array of conflicting plugins: slug/file => real plugin name.
 	$conflicting_plugins = array(
 		'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
 		'premium-seo-pack/index.php'                  => 'Premium SEO Pack',
@@ -265,20 +264,20 @@ function noindex_seo_detect_conflicts() {
 		'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
 	);
 
-	// Iterar a través de los plugins conflictivos para verificar si alguno está activo.
+	// Iterate through the conflicting plugins to check if any are active.
 	foreach ( $conflicting_plugins as $plugin_path => $plugin_name ) {
 		if ( is_plugin_active( $plugin_path ) ) {
-			// Añadir una notificación de administrador si se detecta un plugin conflictivo activo.
+			// Add an admin notice if a conflicting plugin is active.
 			add_action(
 				'admin_notices',
 				function () use ( $plugin_name ) {
 					echo '<div class="notice notice-warning is-dismissible"><p>';
 					// translators: plugin name.
-					printf( esc_html__( 'noindex SEO ha detectado que %s está activo. Esto puede causar conflictos. Por favor, configura las opciones en consecuencia.', 'noindex-seo' ), esc_html( $plugin_name ) );
+					printf( esc_html__( 'noindex SEO has detected that %s is active. This may cause conflicts. Please configure the options accordingly.', 'noindex-seo' ), esc_html( $plugin_name ) );
 					echo '</p></div>';
 				}
 			);
-			break; // Detener la verificación después de encontrar el primer conflicto.
+			break; // Stop checking after finding the first conflict.
 		}
 	}
 }
@@ -491,7 +490,7 @@ function noindex_seo_admin() {
 			settings_fields( 'noindexseo' );
 			do_settings_sections( 'noindexseo' ); // In case you have sections added later.
 			?>
-			<p><?php echo esc_html( __( 'Important note: if you have any doubt about any of the following items it is best not to activate the option as you could lose results in the search engines.', 'noindex-seo' ) ); ?></p>
+			<p><?php echo esc_html( __( 'Important note: if you have any doubt about any of the following items, it is best not to activate the option as you could lose results in the search engines.', 'noindex-seo' ) ); ?></p>
 			<?php
 			foreach ( $sections as $section_id => $section ) {
 				echo '<h2>' . esc_html( $section['title'] ) . '</h2>';
