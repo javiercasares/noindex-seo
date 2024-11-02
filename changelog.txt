@@ -2,8 +2,14 @@
 
 = 1.1.0 [2024-11-02] =
 
+**Added**
+
+* Detects other WordPress SEO plugins, and creates a notice about it, to avoid conflicts.
+* Has filters, so other plugins can hack.
+
 **Changed**
 
+* Uses native wp_robots functions (since WP 5.7+)
 * Big refactory.
 * Less size, improved code quality.
 
