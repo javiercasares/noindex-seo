@@ -1,13 +1,13 @@
 === noindex SEO ===
 Contributors: javiercasares
 Tags: seo, noindex
-Requires at least: 5.2
-Tested up to: 6.4
-Stable tag: 1.0.12
+Requires at least: 4.1
+Tested up to: 6.7
+Stable tag: 1.1.0
 Requires PHP: 5.6
-Version: 1.0.12
-License: EUPL v1.2
-License URI: https://eupl.eu/1.2/en/
+Version: 1.1.0
+License: GPL-2.0-or-later
+License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
 Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
 
@@ -79,6 +79,31 @@ Visit the plugin section in your WordPress, search for [noindex-seo]; download a
 
 Extract the contents of the ZIP and upload the contents to the `/wp-content/plugins/noindex-seo/` directory. Once uploaded, it will appear in your plugin list.
 
+== Compatibility ==
+
+* WordPress: 4.1 - 6.7
+* PHP: 5.6 - 8.4
+
+== Changelog ==
+
+= 1.1.0 [2024-11-02] =
+
+**Changed**
+
+* Big refactory.
+* Less size, improved code quality.
+
+**Compatibility**
+
+* WordPress: 4.1 - 6.7
+* PHP: 5.6 - 8.4
+
+**Tests**
+
+* PHP Coding Standards: 3.10.3
+* WordPress Coding Standards: 3.1.0
+* Plugin Check (PCP): 1.1.0
+
 == Security ==
 
 This plugin adheres to the following security measures and review protocols for each version:
@@ -87,6 +112,7 @@ This plugin adheres to the following security measures and review protocols for 
 * [WordPress Plugin Security](https://developer.wordpress.org/plugins/wordpress-org/plugin-security/)
 * [WordPress APIs Security](https://developer.wordpress.org/apis/security/)
 * [WordPress Coding Standards](https://github.com/WordPress/WordPress-Coding-Standards)
+* [Plugin Check (PCP)](https://wordpress.org/plugins/plugin-check/)
 
 == Privacy ==
 
@@ -94,86 +120,6 @@ This plugin adheres to the following security measures and review protocols for 
 
 == Vulnerabilities ==
 
-* No vulnerabilities have been published up to version 1.0.12.
+* No vulnerabilities have been published up to version 1.1.0.
 
 Found a security vulnerability? Please report it to us privately at the [WPVulnerability GitHub repository](https://github.com/javiercasares/noindex-seo/security/advisories/new).
-
-== Compatibility ==
-
-= 1.0.12 =
-
-* WordPress: 5.2 - 6.4
-* PHP: 5.6 - 8.3
-* WPCS: 3.0.1
-
-== Changelog ==
-
-= 1.0.12 =
-
-* Compatibility: WordPress 4.1 - WordPress 6.4.
-* Compatibility: PHP 5.6 - PHP 8.3.
-* Compatibility: WordPress Coding Standards 3.0.1.
-
-= 1.0.11 =
-
-* Fix showing all the text.
-
-= 1.0.10 =
-
-* WordPress Coding Standards 3.0.0 compatible.
-
-* Compatibility: PHP 5.6 - PHP 8.3.
-
-= 1.0.9 =
-
-* Improved functions checking.
-
-* Compatibility: WordPress 5.2 - WordPress 6.3.
-* Compatibility: PHP 7.0 - PHP 8.3.
-
-= 1.0.8 =
-
-* Compatibility: WordPress 5.2 - WordPress 6.2
-* Compatibility: PHP 7.2 - PHP 8.1
-
-= 1.0.7 =
-
-* Minor refactoring
-
-* Compatibility: WordPress 4.9 - WordPress 6.1
-* Compatibility: PHP 5.6.20 - PHP 8.1
-
-= 1.0.6 =
-
-* Compatibility: WordPress 4.9 - WordPress 6.0
-* Compatibility: PHP 5.6.20 - PHP 8.1
-
-= 1.0.5 =
-
-* Compatibility: WordPress 4.9 - WordPress 5.9
-* Compatibility: PHP 5.6.20 - PHP 8.1
-
-= 1.0.4 =
-
-* Compatibility: WordPress 5.8
-
-= 1.0.3 =
-
-* Compatibility: WordPress 5.7
-
-= 1.0.2 =
-
-* Compatibility: WordPress 5.6
-* Compatibility: PHP 8.0
-
-= 1.0.1 =
-
-* Compatibility: WordPress 5.5
-
-= 1.0.0 =
-
-* Compatibility: WordPress 5.4
-
-= 0.1 =
-
-* First version.

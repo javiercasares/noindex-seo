@@ -3,13 +3,13 @@
  * Plugin Name: noindex SEO
  * Plugin URI: https://wordpress.org/plugins/noindex-seo/
  * Description: Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
- * Requires at least: 5.2
+ * Requires at least: 4.1
  * Requires PHP: 5.6
- * Version: 1.0.12
+ * Version: 1.1.0
  * Author: Javier Casares
  * Author URI: https://www.javiercasares.com/
- * License: EUPL v1.2
- * License URI: https://eupl.eu/1.2/en/
+ * License: GPL-2.0-or-later
+ * License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
  * Text Domain: noindex-seo
  * Domain Path: /languages
  *
@@ -629,6 +629,9 @@ function noindex_seo_admin() {
 			?>
 			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-no" title="No"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the site\'s pages.', 'noindex-seo' ) ); ?></span></fieldset></td>
 		</tr>
+<?php
+	if ( version_compare( $GLOBALS['wp_version'], '5.2', '>=' ) ) {
+?>
 		<tr>
 			<th scope="row"><label for="noindex_seo_privacy_policy"><?php echo esc_html( __( 'Privacy Policy', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_privacy_policy" name="noindex_seo_privacy_policy" value="1"
@@ -638,6 +641,9 @@ function noindex_seo_admin() {
 			?>
 			> <?php echo esc_html( __( 'Recommended', 'noindex-seo' ) ); ?>: <span class="dashicons dashicons-yes" title="Yes"></span>. <span class="description"><?php echo esc_html( __( 'This will block the indexing of the site\'s privacy policy page.', 'noindex-seo' ) ); ?> <a href="<?php echo esc_url( get_privacy_policy_url() ); ?>" target="_blank"><?php echo esc_html( __( 'View', 'noindex-seo' ) ); ?></a></span></fieldset></td>
 		</tr>
+<?php
+	}
+?>
 		<tr>
 			<th scope="row"><label for="noindex_seo_single"><?php echo esc_html( __( 'Single', 'noindex-seo' ) ); ?></label></th>
 			<td><fieldset><input type="checkbox" id="noindex_seo_single" name="noindex_seo_single" value="1"
