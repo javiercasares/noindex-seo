@@ -47,17 +47,6 @@ function noindex_seo_metarobots() {
 function noindex_seo_show() {
 	global $post;
 
-	// Try to get the options from the transient.
-	$options = get_transient( 'noindex_seo_options' );
-
-	if ( false === $options ) {
-		// Transient not set, retrieve options from the database.
-		$options = get_option( 'noindexseo', array() );
-
-		// Set the transient for 1 hour to cache the options.
-		set_transient( 'noindex_seo_options', $options, HOUR_IN_SECONDS );
-	}
-
 	/**
 	 * Filter the contexts and corresponding option keys used for noindex.
 	 *
@@ -92,6 +81,21 @@ function noindex_seo_show() {
 			'error'             => 'noindex_seo_error',
 		)
 	);
+
+	// Try to get the options from the transient.
+	$options = get_transient( 'noindex_seo_options' );
+
+	if ( false === $options || empty( $options ) ) {
+		// Transient not set, retrieve options from the database.
+		$options = array();
+
+		foreach ( $contexts as $context => $option_key ) {
+			$options[ $option_key ] = get_option( $option_key, 0 );
+		}
+
+		// Set the transient for 1 hour to cache the options.
+		set_transient( 'noindex_seo_options', $options, HOUR_IN_SECONDS );
+	}
 
 	// Define current conditions.
 	$current_conditions = array(
