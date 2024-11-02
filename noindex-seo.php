@@ -255,9 +255,14 @@ function noindex_seo_detect_conflicts() {
 
 	// Definir un array asociativo de plugins conflictivos: slug/fichero => nombre real del plugin.
 	$conflicting_plugins = array(
+		'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
+		'premium-seo-pack/index.php'                  => 'Premium SEO Pack',
+		'seo-by-rank-math/rank-math.php'              => 'Rank Math SEO',
+		'wp-seopress/seopress.php'                    => 'SEOPress',
+		'slim-seo/slim-seo.php'                       => 'Slim SEO',
+		'squirrly-seo/squirrly.php'                   => 'Squirrly SEO',
+		'autodescription/autodescription.php'         => 'The SEO Framework',
 		'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
-		'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO Pack',
-		// Añadir otros plugins SEO conflictivos según sea necesario.
 	);
 
 	// Iterar a través de los plugins conflictivos para verificar si alguno está activo.
