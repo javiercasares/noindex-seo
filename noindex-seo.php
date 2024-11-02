@@ -21,16 +21,28 @@ defined( 'ABSPATH' ) || die( 'Bye bye!' );
 /**
  * Outputs a 'noindex' meta robots tag to the page.
  *
- * This function prints the 'noindex' meta robots tag, instructing search engines
- * not to index the content of the current page.
+ * This function ensures the 'noindex' directive is set in the robots meta tag,
+ * instructing search engines not to index the content of the current page.
  *
  * @since 1.0.0
  *
  * @return void
  */
 function noindex_seo_metarobots() {
-	echo '<meta name="robots" content="noindex">' . "\n";
+
+	if ( function_exists( 'wp_robots' ) ) {
+		add_filter(
+			'wp_robots',
+			function ( $robots ) {
+				$robots['noindex'] = true;
+				return $robots;
+			}
+		);
+	} else {
+		echo '<meta name="robots" content="noindex">' . "\n";
+	}
 }
+
 
 /**
  * Retrieves and sets the SEO 'noindex' values for various WordPress contexts.
@@ -40,13 +52,11 @@ function noindex_seo_metarobots() {
  *
  * @global WP_Post $post The post global for the current post, if within The Loop.
  *
- * @return void.
+ * @return void
  *
- * @since 1.1.0.
+ * @since 1.1.0
  */
 function noindex_seo_show() {
-	global $post;
-
 	/**
 	 * Filter the contexts and corresponding option keys used for noindex.
 	 *
@@ -57,28 +67,28 @@ function noindex_seo_show() {
 	$contexts = apply_filters(
 		'noindex_seo_contexts',
 		array(
-			'front_page'        => 'noindex_seo_front_page',
-			'home'              => 'noindex_seo_home',
+			'single'            => 'noindex_seo_single',
 			'page'              => 'noindex_seo_page',
 			'privacy_policy'    => 'noindex_seo_privacy_policy',
-			'single'            => 'noindex_seo_single',
-			'singular'          => 'noindex_seo_singular',
+			'attachment'        => 'noindex_seo_attachment',
 			'category'          => 'noindex_seo_category',
 			'tag'               => 'noindex_seo_tag',
+			'author'            => 'noindex_seo_author',
+			'post_type_archive' => 'noindex_seo_post_type_archive',
 			'date'              => 'noindex_seo_date',
 			'day'               => 'noindex_seo_day',
 			'month'             => 'noindex_seo_month',
-			'time'              => 'noindex_seo_time',
 			'year'              => 'noindex_seo_year',
 			'archive'           => 'noindex_seo_archive',
-			'author'            => 'noindex_seo_author',
-			'post_type_archive' => 'noindex_seo_post_type_archive',
-			'paged'             => 'noindex_seo_paged',
 			'search'            => 'noindex_seo_search',
-			'attachment'        => 'noindex_seo_attachment',
-			'customize_preview' => 'noindex_seo_customize_preview',
-			'preview'           => 'noindex_seo_preview',
 			'error'             => 'noindex_seo_error',
+			'front_page'        => 'noindex_seo_front_page',
+			'home'              => 'noindex_seo_home',
+			'singular'          => 'noindex_seo_singular',
+			'paged'             => 'noindex_seo_paged',
+			'preview'           => 'noindex_seo_preview',
+			'customize_preview' => 'noindex_seo_customize_preview',
+			'time'              => 'noindex_seo_time',
 		)
 	);
 
@@ -97,30 +107,30 @@ function noindex_seo_show() {
 		set_transient( 'noindex_seo_options', $options, HOUR_IN_SECONDS );
 	}
 
-	// Define current conditions.
+	// Define current conditions, ordered from most specific to most general.
 	$current_conditions = array(
-		'front_page'        => is_front_page(),
-		'home'              => is_home(),
-		'page'              => is_page(),
-		'privacy_policy'    => function_exists( 'is_privacy_policy' ) ? is_privacy_policy() : false,
 		'single'            => is_single(),
-		'singular'          => is_singular(),
+		'page'              => is_page(),
+		'attachment'        => is_attachment(),
+		'privacy_policy'    => function_exists( 'is_privacy_policy' ) ? is_privacy_policy() : false,
 		'category'          => is_category(),
 		'tag'               => is_tag(),
-		'date'              => is_date(),
-		'day'               => is_day(),
-		'month'             => is_month(),
-		'time'              => is_time(),
-		'year'              => is_year(),
-		'archive'           => is_archive(),
 		'author'            => is_author(),
 		'post_type_archive' => is_post_type_archive(),
-		'paged'             => is_paged(),
+		'day'               => is_day(),
+		'month'             => is_month(),
+		'year'              => is_year(),
+		'time'              => is_time(),
+		'date'              => is_date() && ! ( is_day() || is_month() || is_year() || is_time() ),
+		'archive'           => is_archive() && ! ( is_category() || is_tag() || is_author() || is_post_type_archive() || is_date() ),
 		'search'            => is_search(),
-		'attachment'        => is_attachment(),
-		'customize_preview' => is_customize_preview(),
-		'preview'           => is_preview(),
 		'error'             => is_404(),
+		'front_page'        => is_front_page() && ! is_paged() && ! is_home(),
+		'home'              => is_home() && ! is_paged(),
+		'singular'          => is_singular() && ! ( is_single() || is_page() || is_attachment() ),
+		'paged'             => is_paged() && ! is_front_page() && ! is_home(),
+		'preview'           => is_preview(),
+		'customize_preview' => is_customize_preview(),
 	);
 
 	// Iterate through the contexts and apply 'noindex' if the condition and setting are true.
@@ -139,7 +149,7 @@ function noindex_seo_show() {
 	unset( $contexts, $options, $current_conditions );
 }
 
-add_action( 'wp_head', 'noindex_seo_show' );
+add_action( 'template_redirect', 'noindex_seo_show' );
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'noindex_seo_settings_link' );
 add_action( 'admin_init', 'noindex_seo_register' );
 add_action( 'admin_menu', 'noindex_seo_menu' );
