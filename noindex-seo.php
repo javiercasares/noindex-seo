@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || die( 'Bye bye!' );
  * This function ensures the 'noindex' directive is set in the robots meta tag,
  * instructing search engines not to index the content of the current page.
  *
- * @since 1.0.0
+ * @since 1.1.0
  *
  * @return void
  */
