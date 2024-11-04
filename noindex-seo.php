@@ -5,7 +5,7 @@
  * Description: Allows adding a meta-tag for robots noindex in specific parts of your WordPress site.
  * Requires at least: 4.1
  * Requires PHP: 5.6
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Javier Casares
  * Author URI: https://www.javiercasares.com/
  * License: GPL-2.0-or-later
@@ -518,11 +518,26 @@ function noindex_seo_admin() {
 			<?php
 			settings_fields( 'noindexseo' );
 			do_settings_sections( 'noindexseo' ); // In case you have sections added later.
+
+			echo '<h2>' . esc_html( __( 'General Configuration', 'noindex-seo' ) ) . '</h2>';
+			echo '<table class="form-table">';
+			// Get current configuration value.
+			$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
+			echo '<tr>';
+			echo '<th scope="row"><label for="noindex_seo_config_seoplugins">' . esc_html( __( 'Plugin compatibility', 'noindex-seo' ) ) . '</label></th>';
+			echo '<td><fieldset>';
+			echo '<input type="checkbox" id="noindex_seo_config_seoplugins" name="noindex_seo_config_seoplugins" value="1" ' . checked( 1, $option_config_seoplugins, false ) . '> ';
+			echo '<span class="description">' . esc_html( __( 'Do not display the message of possible incompatibilities with other plugins.', 'noindex-seo' ) ) . '</span>';
+			echo '</fieldset></td>';
+			echo '</tr>';
+			echo '</table>';
+
+			echo '<h2>' . esc_html( __( 'SEO Configuration', 'noindex-seo' ) ) . '</h2>';
 			?>
 			<p><?php echo esc_html( __( 'Important note: if you have any doubt about any of the following items, it is best not to activate the option as you could lose results in the search engines.', 'noindex-seo' ) ); ?></p>
 			<?php
 			foreach ( $sections as $section_id => $section ) {
-				echo '<h2>' . esc_html( $section['title'] ) . '</h2>';
+				echo '<h3>' . esc_html( $section['title'] ) . '</h3>';
 				echo '<table class="form-table">';
 				foreach ( $section['fields'] as $field_id => $field ) {
 					// Check for conditional display.
@@ -548,18 +563,9 @@ function noindex_seo_admin() {
 					echo '</tr>';
 				}
 
-				// Get current configuration value.
-				$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
-				echo '<tr>';
-				echo '<th scope="row"><label for="noindex_seo_config_seoplugins">' . esc_html( __( 'General configuration', 'noindex-seo' ) ) . '</label></th>';
-				echo '<td><fieldset>';
-				echo '<input type="checkbox" id="noindex_seo_config_seoplugins" name="noindex_seo_config_seoplugins" value="1" ' . checked( 1, $option_config_seoplugins, false ) . '> ';
-				echo '<span class="description">' . esc_html( __( 'Do not display the message of possible incompatibilities with other plugins.', 'noindex-seo' ) ) . '</span>';
-				echo '</fieldset></td>';
-				echo '</tr>';
-
 				echo '</table>';
 			}
+
 			?>
 			<?php submit_button(); ?>
 		</form>

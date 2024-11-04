@@ -3,9 +3,9 @@ Contributors: javiercasares
 Tags: seo, noindex
 Requires at least: 4.1
 Tested up to: 6.7
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 5.6
-Version: 1.1.0
+Version: 1.1.1
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
@@ -85,6 +85,17 @@ Extract the contents of the ZIP and upload the contents to the `/wp-content/plug
 * PHP: 5.6 - 8.4
 
 == Changelog ==
+
+= 1.1.1 [2024-11-04] =
+
+**Added**
+
+* Configuration option to dismiss other SEO plugin incompatibilities.
+
+**Compatibility**
+
+* WordPress: 4.1 - 6.7
+* PHP: 5.6 - 8.4
 
 = 1.1.0 [2024-11-02] =
 

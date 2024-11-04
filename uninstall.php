@@ -28,4 +28,5 @@ if ( defined( 'ABSPATH' ) && defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	delete_option( 'noindex_seo_preview' );
 	delete_option( 'noindex_seo_customize_preview' );
 	delete_option( 'noindex_seo_time' );
+	delete_option( 'noindex_seo_config_seoplugins' );
 }
