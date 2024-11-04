@@ -237,6 +237,15 @@ function noindex_seo_register() {
 		);
 	}
 
+	register_setting(
+		'noindexseo',
+		'noindex_seo_config_seoplugins',
+		array(
+			'type'    => 'integer',
+			'default' => 0,
+		)
+	);
+
 	// Hook to settings update to clear transient cache.
 	add_action( 'update_option_noindexseo', 'noindex_seo_clear_transient', 10, 2 );
 }
@@ -261,37 +270,43 @@ function noindex_seo_clear_transient() {
  * @return void.
  */
 function noindex_seo_detect_conflicts() {
-	// Include the plugin.php file if the function is not available.
-	if ( ! function_exists( 'is_plugin_active' ) ) {
-		include_once ABSPATH . 'wp-admin/includes/plugin.php';
-	}
 
-	// Define an associative array of conflicting plugins: slug/file => real plugin name.
-	$conflicting_plugins = array(
-		'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
-		'premium-seo-pack/index.php'                  => 'Premium SEO Pack',
-		'seo-by-rank-math/rank-math.php'              => 'Rank Math SEO',
-		'wp-seopress/seopress.php'                    => 'SEOPress',
-		'slim-seo/slim-seo.php'                       => 'Slim SEO',
-		'squirrly-seo/squirrly.php'                   => 'Squirrly SEO',
-		'autodescription/autodescription.php'         => 'The SEO Framework',
-		'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
-	);
+	$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
 
-	// Iterate through the conflicting plugins to check if any are active.
-	foreach ( $conflicting_plugins as $plugin_path => $plugin_name ) {
-		if ( is_plugin_active( $plugin_path ) ) {
-			// Add an admin notice if a conflicting plugin is active.
-			add_action(
-				'admin_notices',
-				function () use ( $plugin_name ) {
-					echo '<div class="notice notice-warning is-dismissible"><p>';
-					// translators: plugin name.
-					printf( esc_html__( 'noindex SEO has detected that %s is active. This may cause conflicts. Please configure the options accordingly.', 'noindex-seo' ), esc_html( $plugin_name ) );
-					echo '</p></div>';
-				}
-			);
-			break; // Stop checking after finding the first conflict.
+	if( ! absint( $option_config_seoplugins ) ) {
+
+		// Include the plugin.php file if the function is not available.
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			include_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		// Define an associative array of conflicting plugins: slug/file => real plugin name.
+		$conflicting_plugins = array(
+			'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
+			'premium-seo-pack/index.php'                  => 'Premium SEO Pack',
+			'seo-by-rank-math/rank-math.php'              => 'Rank Math SEO',
+			'wp-seopress/seopress.php'                    => 'SEOPress',
+			'slim-seo/slim-seo.php'                       => 'Slim SEO',
+			'squirrly-seo/squirrly.php'                   => 'Squirrly SEO',
+			'autodescription/autodescription.php'         => 'The SEO Framework',
+			'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
+		);
+
+		// Iterate through the conflicting plugins to check if any are active.
+		foreach ( $conflicting_plugins as $plugin_path => $plugin_name ) {
+			if ( is_plugin_active( $plugin_path ) ) {
+				// Add an admin notice if a conflicting plugin is active.
+				add_action(
+					'admin_notices',
+					function () use ( $plugin_name ) {
+						echo '<div class="notice notice-warning is-dismissible"><p>';
+						// translators: plugin name.
+						printf( esc_html__( 'noindex SEO has detected that %s is active. This may cause conflicts. Please configure the options accordingly.', 'noindex-seo' ), esc_html( $plugin_name ) );
+						echo '</p></div>';
+					}
+				);
+				break; // Stop checking after finding the first conflict.
+			}
 		}
 	}
 }
@@ -532,6 +547,17 @@ function noindex_seo_admin() {
 					echo '</fieldset></td>';
 					echo '</tr>';
 				}
+
+				// Get current configuration value.
+				$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
+				echo '<tr>';
+				echo '<th scope="row"><label for="noindex_seo_config_seoplugins">' . esc_html( __( 'General configuration', 'noindex-seo' ) ) . '</label></th>';
+				echo '<td><fieldset>';
+				echo '<input type="checkbox" id="noindex_seo_config_seoplugins" name="noindex_seo_config_seoplugins" value="1" ' . checked( 1, $option_config_seoplugins, false ) . '> ';
+				echo '<span class="description">' . esc_html( __( 'Do not display the message of possible incompatibilities with other plugins.', 'noindex-seo' ) ) . '</span>';
+				echo '</fieldset></td>';
+				echo '</tr>';
+
 				echo '</table>';
 			}
 			?>
