@@ -5,7 +5,7 @@
  * Description: Allows adding a meta-tag for robots noindex in specific parts of your WordPress site.
  * Requires at least: 4.1
  * Requires PHP: 5.6
- * Version: 1.1.1
+ * Version: 1.2.0
  * Author: Javier Casares
  * Author URI: https://www.javiercasares.com/
  * License: GPL-2.0-or-later
@@ -19,12 +19,18 @@
 defined( 'ABSPATH' ) || die( 'Bye bye!' );
 
 /**
- * Outputs a 'noindex' meta robots tag to the page.
+ * Outputs a 'noindex' directive in the meta robots tag.
  *
- * This function ensures the 'noindex' directive is set in the robots meta tag,
- * instructing search engines not to index the content of the current page.
+ * This function adds a 'noindex' directive to the robots meta tag to instruct search engines
+ * not to index the current page. It uses the `wp_robots` filter if available (WordPress 5.7+),
+ * or falls back to echoing a raw meta tag for older WordPress versions.
+ *
+ * Intended to be called only when certain conditions are met, such as in specific templates
+ * or based on plugin configuration.
  *
  * @since 1.1.0
+ *
+ * @see https://developer.wordpress.org/reference/hooks/wp_robots/
  *
  * @return void
  */
@@ -43,18 +49,23 @@ function noindex_seo_metarobots() {
 	}
 }
 
-
 /**
- * Retrieves and sets the SEO 'noindex' values for various WordPress contexts.
+ * Determines whether to output a 'noindex' meta tag based on page context and plugin settings.
  *
- * This function optimizes option retrieval by fetching all relevant settings at once
- * using transient caching, reducing the number of database queries.
+ * This function checks the current page context (e.g., single post, category archive, 404 page, etc.)
+ * and evaluates plugin settings to determine if a 'noindex' directive should be added to the meta robots tag.
  *
- * @global WP_Post $post The post global for the current post, if within The Loop.
+ * It retrieves settings efficiently using a transient cache. If the cache is not set, it pulls values
+ * from the WordPress options API and rebuilds the cache.
  *
- * @return void
+ * The list of contexts and their associated option keys can be filtered via the {@see 'noindex_seo_contexts'} filter.
+ * Once a matching context with 'noindex' enabled is found, it calls {@see noindex_seo_metarobots()} to apply the directive.
  *
  * @since 1.1.0
+ *
+ * @global WP_Post $post The global post object, if available.
+ *
+ * @return void
  */
 function noindex_seo_show() {
 	/**
@@ -135,6 +146,7 @@ function noindex_seo_show() {
 
 	// Iterate through the contexts and apply 'noindex' if the condition and setting are true.
 	foreach ( $contexts as $context => $option_key ) {
+
 		if (
 			isset( $current_conditions[ $context ] ) &&
 			$current_conditions[ $context ] &&
@@ -142,6 +154,7 @@ function noindex_seo_show() {
 			(bool) $options[ $option_key ]
 		) {
 			noindex_seo_metarobots();
+
 			break; // Prevent multiple meta tags from being added.
 		}
 	}
@@ -155,13 +168,18 @@ add_action( 'admin_init', 'noindex_seo_register' );
 add_action( 'admin_menu', 'noindex_seo_menu' );
 
 /**
- * Adds a 'Settings' link to the plugin action links on the plugins page.
+ * Adds a "Settings" link to the plugin row actions on the Plugins admin screen.
+ *
+ * This function appends a direct link to the plugin's settings page within the list of action links
+ * shown for the plugin on the Plugins page (`/wp-admin/plugins.php`). This improves user accessibility
+ * by allowing quick access to the plugin's configuration page.
+ *
+ * Hooked to the {@see 'plugin_action_links_{plugin_basename}'} filter.
  *
  * @since 1.0.0
  *
- * @param array $links An array of action links already present for the plugin.
- *
- * @return array Returns the updated array of action links including the 'Settings' link.
+ * @param string[] $links Array of existing action links for the plugin.
+ * @return string[] Modified array including the "Settings" link.
  */
 function noindex_seo_settings_link( $links ) {
 	$settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=noindex_seo' ) ) . '">' . esc_html__( 'Settings', 'noindex-seo' ) . '</a>';
@@ -170,7 +188,13 @@ function noindex_seo_settings_link( $links ) {
 }
 
 /**
- * Adds a 'noindex SEO' options page to the WordPress admin menu.
+ * Registers the "noindex SEO" settings page in the WordPress admin menu.
+ *
+ * This function adds an entry under the "Settings" menu in the WordPress admin area,
+ * which links to the plugin's main configuration page. The settings page is only accessible
+ * to users with the 'manage_options' capability.
+ *
+ * Internally uses {@see add_options_page()} to register the page.
  *
  * @since 1.0.0
  *
@@ -187,11 +211,18 @@ function noindex_seo_menu() {
 }
 
 /**
- * Registers settings for the 'noindex SEO' plugin.
+ * Registers all settings used by the 'noindex SEO' plugin.
  *
- * This function registers a variety of settings associated with the 'noindex SEO' functionality in WordPress.
- * Each setting determines whether specific pages or post types should be excluded from search engine indexing.
- * The settings values are integers, with a default value of 0 (which typically represents 'false' or 'off' in boolean context).
+ * This function registers individual options for each context in which the plugin
+ * may apply a 'noindex' directive (e.g., single posts, category pages, archives, etc.).
+ * Each setting is stored as an integer (0 or 1), where 1 indicates that 'noindex' is enabled
+ * for that context.
+ *
+ * All settings are grouped under the option group 'noindexseo' and will be handled by the
+ * WordPress Settings API when the options form is submitted.
+ *
+ * Also registers the general configuration option 'noindex_seo_config_seoplugins'.
+ * A transient cache is cleared upon update using the {@see 'update_option_noindexseo'} action.
  *
  * @since 1.0.0
  *
@@ -227,6 +258,7 @@ function noindex_seo_register() {
 	);
 
 	foreach ( $settings as $setting ) {
+
 		register_setting(
 			'noindexseo',
 			'noindex_seo_' . $setting,
@@ -251,7 +283,15 @@ function noindex_seo_register() {
 }
 
 /**
- * Clears the transient cache when settings are updated.
+ * Clears the cached plugin settings stored in the transient.
+ *
+ * This function deletes the 'noindex_seo_options' transient to ensure that updated
+ * option values are fetched fresh from the database on the next request. It is typically
+ * triggered after the plugin settings are updated to prevent stale data from being used.
+ *
+ * Hooked to the {@see 'update_option_noindexseo'} action.
+ *
+ * @since 1.0.0
  *
  * @return void
  */
@@ -260,20 +300,27 @@ function noindex_seo_clear_transient() {
 }
 
 /**
- * Detects conflicting SEO plugins and notifies the administrator.
+ * Detects potential conflicts with other SEO plugins and displays an admin notice.
  *
- * This function checks if any known conflicting SEO plugins are active.
- * If a conflict is detected, it displays an admin notice warning the user.
+ * This function checks for the presence of known SEO plugins that may conflict with
+ * the functionality of 'noindex SEO'. If a conflicting plugin is active and the user
+ * has not opted to suppress warnings (via the 'noindex_seo_config_seoplugins' option),
+ * a dismissible admin notice is displayed to alert the site administrator.
  *
- * @since 1.1.0.
+ * The list of conflicting plugins includes popular SEO tools such as Yoast SEO, Rank Math,
+ * SEOPress, and others. The check is performed using {@see is_plugin_active()}.
  *
- * @return void.
+ * Hooked to the {@see 'admin_init'} action.
+ *
+ * @since 1.1.0
+ *
+ * @return void
  */
 function noindex_seo_detect_conflicts() {
 
 	$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
 
-	if( ! absint( $option_config_seoplugins ) ) {
+	if ( ! absint( $option_config_seoplugins ) ) {
 
 		// Include the plugin.php file if the function is not available.
 		if ( ! function_exists( 'is_plugin_active' ) ) {
@@ -310,11 +357,95 @@ function noindex_seo_detect_conflicts() {
 		}
 	}
 }
-
 add_action( 'admin_init', 'noindex_seo_detect_conflicts' );
 
 /**
- * Displays the administration settings page for the 'noindex SEO' plugin.
+ * Processes the form submission for the 'noindex SEO' plugin settings.
+ *
+ * This function handles the saving of plugin options submitted from the custom admin form.
+ * It first verifies the current user's capability and nonce for security. Then it resets all
+ * registered context options to `0`, and selectively updates those submitted as checked in the form.
+ *
+ * Additionally, it updates the general configuration setting `noindex_seo_config_seoplugins`,
+ * clears the plugin's transient cache, and redirects back to the settings page.
+ *
+ * Hooked to the {@see 'admin_post_update_noindex_seo'} action.
+ *
+ * @since 1.2.0
+ *
+ * @return void
+ */
+function noindex_seo_process_form() {
+	if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'update_noindex_seo_nonce' ) ) {
+		wp_die( esc_html__( 'Permission denied or invalid nonce.', 'noindex-seo' ) );
+	}
+
+	$settings = array(
+		'error',
+		'archive',
+		'attachment',
+		'author',
+		'category',
+		'comment_feed',
+		'customize_preview',
+		'date',
+		'day',
+		'feed',
+		'front_page',
+		'home',
+		'month',
+		'page',
+		'paged',
+		'post_type_archive',
+		'preview',
+		'privacy_policy',
+		'robots',
+		'search',
+		'single',
+		'singular',
+		'tag',
+		'time',
+		'year',
+	);
+
+	// Reset all options to 0.
+	foreach ( $settings as $setting ) {
+		update_option( 'noindex_seo_' . $setting, 0 );
+	}
+
+	// Save only active options (checked checkboxes).
+	foreach ( $settings as $setting ) {
+		if ( isset( $_POST[ 'noindex_seo_' . $setting ] ) ) {
+			update_option( 'noindex_seo_' . $setting, 1 );
+		}
+	}
+
+	// Save general configuration option.
+	update_option(
+		'noindex_seo_config_seoplugins',
+		isset( $_POST['noindex_seo_config_seoplugins'] ) ? 1 : 0
+	);
+
+	// Clear cache.
+	delete_transient( 'noindex_seo_options' );
+
+	wp_safe_redirect( admin_url( 'options-general.php?page=noindex_seo&updated=true' ) );
+	exit;
+}
+add_action( 'admin_post_update_noindex_seo', 'noindex_seo_process_form' );
+
+/**
+ * Renders the settings page for the 'noindex SEO' plugin in the WordPress admin.
+ *
+ * This function outputs the full HTML for the plugin's settings interface, including:
+ * - General configuration (e.g., disabling conflict notices)
+ * - A structured list of SEO-related options grouped by context (main pages, archives, taxonomies, etc.)
+ *
+ * Each context is represented as a checkbox that allows the administrator to enable or disable
+ * the `noindex` meta directive for that specific section of the site.
+ *
+ * The form is submitted via `admin-post.php` and processed by {@see noindex_seo_process_form()}.
+ * Security is enforced with a nonce field. Options are retrieved using `get_option()` for each field.
  *
  * @since 1.0.0
  *
@@ -514,10 +645,10 @@ function noindex_seo_admin() {
 	?>
 	<div class="wrap">
 		<h1><?php echo esc_html( __( 'noindex SEO Settings', 'noindex-seo' ) ); ?></h1>
-		<form method="post" action="options.php">
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<input type="hidden" name="action" value="update_noindex_seo">
 			<?php
-			settings_fields( 'noindexseo' );
-			do_settings_sections( 'noindexseo' ); // In case you have sections added later.
+			wp_nonce_field( 'update_noindex_seo_nonce' );
 
 			echo '<h2>' . esc_html( __( 'General Configuration', 'noindex-seo' ) ) . '</h2>';
 			echo '<table class="form-table">';
@@ -553,6 +684,7 @@ function noindex_seo_admin() {
 					echo '<td><fieldset>';
 					echo '<input type="checkbox" id="noindex_seo_' . esc_attr( $field_id ) . '" name="noindex_seo_' . esc_attr( $field_id ) . '" value="1" ' . checked( 1, $option, false ) . '> ';
 					echo esc_html( $field['recommended'] ) . ': <span class="dashicons ' . ( $field['suggestion'] ? 'dashicons-yes' : 'dashicons-no' ) . '" title="' . ( $field['suggestion'] ? 'Yes' : 'No' ) . '"></span>. ';
+
 					echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
 
 					if ( isset( $field['view_url'] ) ) {

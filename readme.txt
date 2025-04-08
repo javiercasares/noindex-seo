@@ -2,10 +2,10 @@
 Contributors: javiercasares
 Tags: seo, noindex
 Requires at least: 4.1
-Tested up to: 6.7
-Stable tag: 1.1.1
+Tested up to: 6.8
+Stable tag: 1.2.0
 Requires PHP: 5.6
-Version: 1.1.1
+Version: 1.2.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
@@ -81,10 +81,31 @@ Extract the contents of the ZIP and upload the contents to the `/wp-content/plug
 
 == Compatibility ==
 
-* WordPress: 4.1 - 6.7
+* WordPress: 4.1 - 6.8
 * PHP: 5.6 - 8.4
 
 == Changelog ==
+
+= 1.2.0 [2025-04-08] =
+
+**Changes**
+
+* Improved functions documentation.
+
+**Fixes**
+
+* The way the options are saved.
+
+**Compatibility**
+
+* WordPress: 4.1 - 6.8
+* PHP: 5.6 - 8.4
+
+**Tests**
+
+* PHP Coding Standards: 3.12.1
+* WordPress Coding Standards: 3.1.0
+* Plugin Check (PCP): 1.4.0
 
 = 1.1.1 [2024-11-04] =
 
@@ -137,6 +158,6 @@ This plugin adheres to the following security measures and review protocols for 
 
 == Vulnerabilities ==
 
-* No vulnerabilities have been published up to version 1.1.0.
+* No vulnerabilities have been published up to version 1.2.0.
 
-Found a security vulnerability? Please report it to us privately at the [WPVulnerability GitHub repository](https://github.com/javiercasares/noindex-seo/security/advisories/new).
+Found a security vulnerability? Please report it to us privately at the [noindex SEO GitHub repository](https://github.com/javiercasares/noindex-seo/security/advisories/new).
