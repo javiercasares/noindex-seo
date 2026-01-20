@@ -1,32 +1,62 @@
 <?php
 /**
- * Uninstall the plugin.
+ * Uninstall the noindex SEO plugin.
+ *
+ * This file is called by WordPress when the plugin is deleted through the admin interface.
+ * It removes all plugin options and transients from the database to ensure a clean uninstall.
  *
  * @package noindex-seo
+ * @since 1.0.0
+ * @since 2.0.0 Added cleanup for new implementation method option and transients.
  */
 
-if ( defined( 'ABSPATH' ) && defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-	delete_option( 'noindex_seo_single' );
-	delete_option( 'noindex_seo_page' );
-	delete_option( 'noindex_seo_privacy_policy' );
-	delete_option( 'noindex_seo_attachment' );
-	delete_option( 'noindex_seo_category' );
-	delete_option( 'noindex_seo_tag' );
-	delete_option( 'noindex_seo_author' );
-	delete_option( 'noindex_seo_post_type_archive' );
-	delete_option( 'noindex_seo_date' );
-	delete_option( 'noindex_seo_day' );
-	delete_option( 'noindex_seo_month' );
-	delete_option( 'noindex_seo_year' );
-	delete_option( 'noindex_seo_archive' );
-	delete_option( 'noindex_seo_search' );
-	delete_option( 'noindex_seo_error' );
-	delete_option( 'noindex_seo_front_page' );
-	delete_option( 'noindex_seo_home' );
-	delete_option( 'noindex_seo_singular' );
-	delete_option( 'noindex_seo_paged' );
-	delete_option( 'noindex_seo_preview' );
-	delete_option( 'noindex_seo_customize_preview' );
-	delete_option( 'noindex_seo_time' );
-	delete_option( 'noindex_seo_config_seoplugins' );
+// Exit if uninstall not called from WordPress.
+if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+	exit;
 }
+
+// Delete all noindex context options.
+$context_options = array(
+	'noindex_seo_archive',
+	'noindex_seo_attachment',
+	'noindex_seo_author',
+	'noindex_seo_category',
+	'noindex_seo_comment_feed',
+	'noindex_seo_customize_preview',
+	'noindex_seo_date',
+	'noindex_seo_day',
+	'noindex_seo_error',
+	'noindex_seo_feed',
+	'noindex_seo_front_page',
+	'noindex_seo_home',
+	'noindex_seo_month',
+	'noindex_seo_page',
+	'noindex_seo_paged',
+	'noindex_seo_post_type_archive',
+	'noindex_seo_preview',
+	'noindex_seo_privacy_policy',
+	'noindex_seo_robots',
+	'noindex_seo_search',
+	'noindex_seo_single',
+	'noindex_seo_singular',
+	'noindex_seo_tag',
+	'noindex_seo_time',
+	'noindex_seo_year',
+);
+
+foreach ( $context_options as $option ) {
+	delete_option( $option );
+}
+
+// Delete configuration options.
+delete_option( 'noindex_seo_config_seoplugins' );
+delete_option( 'noindex_seo_config_method' );
+
+// Delete transient cache.
+delete_transient( 'noindex_seo_options' );
+
+// Clean up any leftover options (in case of partial uninstall).
+global $wpdb;
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'noindex_seo_%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_noindex_seo_%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_noindex_seo_%'" );
