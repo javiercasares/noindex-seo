@@ -2,15 +2,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: noindex SEO\n"
-"POT-Creation-Date: 2025-04-08 11:49+0200\n"
-"PO-Revision-Date: 2025-04-08 11:49+0200\n"
+"POT-Creation-Date: 2026-01-20 15:32+0100\n"
+"PO-Revision-Date: 2026-01-20 15:32+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.8\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-Flags-xgettext: --add-comments=translators:\n"
 "X-Poedit-WPHeader: noindex-seo.php\n"
@@ -19,310 +19,553 @@ msgstr ""
 "__;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
+"X-Poedit-SearchPathExcluded-1: vendor\n"
 
-#: noindex-seo.php:185
+#: assets/js/editor-sidebar.js:91 noindex-seo.php:917
+msgid "Search Engine Visibility"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:102 noindex-seo.php:970 noindex-seo.php:1278
+msgid "Override global settings"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:103
+msgid "Enable to set custom robots directives for this content"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:133
+msgid "Robots Directives:"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:142 noindex-seo.php:1946
+msgid "noindex"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:143
+msgid "Prevent search engines from indexing"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:157 noindex-seo.php:1951
+msgid "nofollow"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:158
+msgid "Prevent search engines from following links"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:172 noindex-seo.php:1956
+msgid "noarchive"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:173
+msgid "Prevent cached versions in search results"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:187 noindex-seo.php:1961
+msgid "nosnippet"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:188
+msgid "Prevent text snippets in search results"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:202 noindex-seo.php:1966
+msgid "noimageindex"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:203 noindex-seo.php:1002
+msgid "Prevent image indexing"
+msgstr ""
+
+#: assets/js/editor-sidebar.js:237
+msgid "Active Directives:"
+msgstr ""
+
+#: noindex-seo.php:429
+msgid "Settings saved successfully!"
+msgstr ""
+
+#: noindex-seo.php:430
+msgid "Expand All"
+msgstr ""
+
+#: noindex-seo.php:431
+msgid "Collapse All"
+msgstr ""
+
+#: noindex-seo.php:500
 msgid "Settings"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
-#: noindex-seo.php:205 noindex-seo.php:206
+#: noindex-seo.php:520 noindex-seo.php:521
 msgid "noindex SEO"
 msgstr ""
 
 #. translators: plugin name.
-#: noindex-seo.php:351
+#: noindex-seo.php:702
 #, php-format
 msgid ""
 "noindex SEO has detected that %s is active. This may cause conflicts. Please "
 "configure the options accordingly."
 msgstr ""
 
-#: noindex-seo.php:380
+#: noindex-seo.php:732
 msgid "Permission denied or invalid nonce."
 msgstr ""
 
-#: noindex-seo.php:458
+#: noindex-seo.php:975
+msgid ""
+"When enabled, these directives will override the global settings for this "
+"specific content."
+msgstr ""
+
+#: noindex-seo.php:982
+msgid "Prevent indexing"
+msgstr ""
+
+#: noindex-seo.php:987
+msgid "Prevent link following"
+msgstr ""
+
+#: noindex-seo.php:992
+msgid "Prevent caching"
+msgstr ""
+
+#: noindex-seo.php:997
+msgid "Prevent snippets"
+msgstr ""
+
+#: noindex-seo.php:1010
+msgid "Effective Directives:"
+msgstr ""
+
+#: noindex-seo.php:1035
+msgid "Override active:"
+msgstr ""
+
+#: noindex-seo.php:1040
+msgid "Override enabled but no directives selected"
+msgstr ""
+
+#: noindex-seo.php:1046
+msgid "Global settings:"
+msgstr ""
+
+#: noindex-seo.php:1051
+msgid "No restrictions (indexable)"
+msgstr ""
+
+#: noindex-seo.php:1146 noindex-seo.php:1152
+msgid "Robots"
+msgstr ""
+
+#: noindex-seo.php:1207
+msgid "Override (none)"
+msgstr ""
+
+#: noindex-seo.php:1274
+msgid "Robots Directives"
+msgstr ""
+
+#: noindex-seo.php:1283
+msgid "🔍 noindex"
+msgstr ""
+
+#: noindex-seo.php:1287
+msgid "🔗 nofollow"
+msgstr ""
+
+#: noindex-seo.php:1291
+msgid "💾 noarchive"
+msgstr ""
+
+#: noindex-seo.php:1295
+msgid "📄 nosnippet"
+msgstr ""
+
+#: noindex-seo.php:1299
+msgid "🖼️ noimageindex"
+msgstr ""
+
+#: noindex-seo.php:1417
+msgid "Enable Robots Override"
+msgstr ""
+
+#: noindex-seo.php:1418
+msgid "Disable Robots Override"
+msgstr ""
+
+#: noindex-seo.php:1545
+#, php-format
+msgid "Robots override enabled for %d post."
+msgid_plural "Robots override enabled for %d posts."
+msgstr[0] ""
+msgstr[1] ""
+
+#: noindex-seo.php:1566
+#, php-format
+msgid "Robots override disabled for %d post."
+msgid_plural "Robots override disabled for %d posts."
+msgstr[0] ""
+msgstr[1] ""
+
+#: noindex-seo.php:1609
+msgid "All robots settings"
+msgstr ""
+
+#: noindex-seo.php:1611
+msgid "With override"
+msgstr ""
+
+#: noindex-seo.php:1614
+msgid "Without override"
+msgstr ""
+
+#: noindex-seo.php:1725
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: noindex-seo.php:1726
+msgid "Permission Denied"
+msgstr ""
+
+#: noindex-seo.php:1748
 msgid "Main Pages"
 msgstr ""
 
-#: noindex-seo.php:461
+#: noindex-seo.php:1751
 msgid "Front Page"
 msgstr ""
 
-#: noindex-seo.php:462 noindex-seo.php:469 noindex-seo.php:481
-#: noindex-seo.php:487 noindex-seo.php:495 noindex-seo.php:501
-#: noindex-seo.php:512 noindex-seo.php:518 noindex-seo.php:529
-#: noindex-seo.php:535 noindex-seo.php:541 noindex-seo.php:547
-#: noindex-seo.php:553 noindex-seo.php:564 noindex-seo.php:570
-#: noindex-seo.php:576 noindex-seo.php:587 noindex-seo.php:598
-#: noindex-seo.php:609 noindex-seo.php:620 noindex-seo.php:626
-#: noindex-seo.php:637
+#: noindex-seo.php:1752 noindex-seo.php:1759 noindex-seo.php:1771
+#: noindex-seo.php:1777 noindex-seo.php:1784 noindex-seo.php:1790
+#: noindex-seo.php:1801 noindex-seo.php:1807 noindex-seo.php:1818
+#: noindex-seo.php:1824 noindex-seo.php:1830 noindex-seo.php:1836
+#: noindex-seo.php:1842 noindex-seo.php:1853 noindex-seo.php:1859
+#: noindex-seo.php:1865 noindex-seo.php:1876 noindex-seo.php:1887
+#: noindex-seo.php:1898 noindex-seo.php:1909 noindex-seo.php:1915
+#: noindex-seo.php:1926 noindex-seo.php:2114
 msgid "Recommended"
 msgstr ""
 
-#: noindex-seo.php:464
-msgid "This will block the indexing of the site's front page."
+#: noindex-seo.php:1754
+msgid "Block the indexing of the site's front page."
 msgstr ""
 
-#: noindex-seo.php:468
+#: noindex-seo.php:1758
 msgid "Home"
 msgstr ""
 
-#: noindex-seo.php:471
-msgid "This will block the indexing of the site's home page."
+#: noindex-seo.php:1761
+msgid "Block the indexing of the site's home page."
 msgstr ""
 
-#: noindex-seo.php:477
+#: noindex-seo.php:1767
 msgid "Pages and Posts"
 msgstr ""
 
-#: noindex-seo.php:480
+#: noindex-seo.php:1770
 msgid "Page"
 msgstr ""
 
-#: noindex-seo.php:483
-msgid "This will block the indexing of the site's pages."
+#: noindex-seo.php:1773
+msgid "Block the indexing of site pages."
 msgstr ""
 
-#: noindex-seo.php:486
+#: noindex-seo.php:1776
 msgid "Privacy Policy"
 msgstr ""
 
-#: noindex-seo.php:489
-msgid "This will block the indexing of the site's privacy policy page."
+#: noindex-seo.php:1779
+msgid "Block the indexing of the privacy policy page."
 msgstr ""
 
-#: noindex-seo.php:494
-msgid "Single"
+#: noindex-seo.php:1783
+msgid "Single Post"
 msgstr ""
 
-#: noindex-seo.php:497
-msgid "This will block the indexing of a post on the site."
+#: noindex-seo.php:1786
+msgid "Block the indexing of individual posts."
 msgstr ""
 
-#: noindex-seo.php:500
+#: noindex-seo.php:1789
 msgid "Singular"
 msgstr ""
 
-#: noindex-seo.php:503
-msgid "This will block the indexing of a post or a page of the site."
+#: noindex-seo.php:1792
+msgid "Block the indexing of any singular content (post or page)."
 msgstr ""
 
-#: noindex-seo.php:508
+#: noindex-seo.php:1797
 msgid "Taxonomies"
 msgstr ""
 
-#: noindex-seo.php:511
+#: noindex-seo.php:1800
 msgid "Category"
 msgstr ""
 
-#: noindex-seo.php:514
-msgid ""
-"This will block the indexing of the site categories. The lists where the "
-"posts appear."
+#: noindex-seo.php:1803
+msgid "Block the indexing of category archive pages."
 msgstr ""
 
-#: noindex-seo.php:517
+#: noindex-seo.php:1806
 msgid "Tag"
 msgstr ""
 
-#: noindex-seo.php:520
-msgid ""
-"This will block the indexing of the site's tags. The lists where the posts "
-"appear."
+#: noindex-seo.php:1809
+msgid "Block the indexing of tag archive pages."
 msgstr ""
 
-#: noindex-seo.php:525
-msgid "Dates"
+#: noindex-seo.php:1814
+msgid "Date Archives"
 msgstr ""
 
-#: noindex-seo.php:528
+#: noindex-seo.php:1817
 msgid "Date"
 msgstr ""
 
-#: noindex-seo.php:531
-msgid ""
-"This will block the indexing of any date-based archive page (i.e., monthly, "
-"yearly, daily, or time-based archive) of the site. The lists where the posts "
-"appear."
+#: noindex-seo.php:1820
+msgid "Block the indexing of any date-based archive page."
 msgstr ""
 
-#: noindex-seo.php:534
+#: noindex-seo.php:1823
 msgid "Day"
 msgstr ""
 
-#: noindex-seo.php:537
-msgid ""
-"This will block the indexing of a daily archive of the site. The lists where "
-"the posts appear."
+#: noindex-seo.php:1826
+msgid "Block the indexing of daily archive pages."
 msgstr ""
 
-#: noindex-seo.php:540
+#: noindex-seo.php:1829
 msgid "Month"
 msgstr ""
 
-#: noindex-seo.php:543
-msgid ""
-"This will block the indexing of a monthly archive of the site. The lists "
-"where the posts appear."
+#: noindex-seo.php:1832
+msgid "Block the indexing of monthly archive pages."
 msgstr ""
 
-#: noindex-seo.php:546
+#: noindex-seo.php:1835
 msgid "Time"
 msgstr ""
 
-#: noindex-seo.php:549
-msgid ""
-"This will block the indexing of an hourly, \"minutely\", or \"secondly\" "
-"archive of the site. The lists where the posts appear."
+#: noindex-seo.php:1838
+msgid "Block the indexing of time-based archive pages."
 msgstr ""
 
-#: noindex-seo.php:552
+#: noindex-seo.php:1841
 msgid "Year"
 msgstr ""
 
-#: noindex-seo.php:555
-msgid ""
-"This will block the indexing of a yearly archive of the site. The lists "
-"where the posts appear."
+#: noindex-seo.php:1844
+msgid "Block the indexing of yearly archive pages."
 msgstr ""
 
-#: noindex-seo.php:560
+#: noindex-seo.php:1849
 msgid "Archives"
 msgstr ""
 
-#: noindex-seo.php:563
+#: noindex-seo.php:1852
 msgid "Archive"
 msgstr ""
 
-#: noindex-seo.php:566
-msgid ""
-"This will block the indexing of any type of Archive page. Category, Tag, "
-"Author, and Date-based pages are all types of Archives. The lists where the "
-"posts appear."
+#: noindex-seo.php:1855
+msgid "Block the indexing of any type of archive page."
 msgstr ""
 
-#: noindex-seo.php:569
+#: noindex-seo.php:1858
 msgid "Author"
 msgstr ""
 
-#: noindex-seo.php:572
-msgid ""
-"This will block the indexing of the author's page, where the author's "
-"publications appear."
+#: noindex-seo.php:1861
+msgid "Block the indexing of author archive pages."
 msgstr ""
 
-#: noindex-seo.php:575
+#: noindex-seo.php:1864
 msgid "Post Type Archive"
 msgstr ""
 
-#: noindex-seo.php:578
-msgid "This will block the indexing of any post type page."
+#: noindex-seo.php:1867
+msgid "Block the indexing of post type archive pages."
 msgstr ""
 
-#: noindex-seo.php:583 noindex-seo.php:586
+#: noindex-seo.php:1872
 msgid "Pagination"
 msgstr ""
 
-#: noindex-seo.php:589
-msgid ""
-"This will block the indexing of the pagination, i.e., all pages other than "
-"the main page of an archive."
+#: noindex-seo.php:1875
+msgid "Paginated Pages"
 msgstr ""
 
-#: noindex-seo.php:594 noindex-seo.php:597
+#: noindex-seo.php:1878
+msgid "Block the indexing of pagination pages (page 2, 3, etc.)."
+msgstr ""
+
+#: noindex-seo.php:1883
 msgid "Search"
 msgstr ""
 
-#: noindex-seo.php:600
-msgid "This will block the indexing of the internal search result pages."
+#: noindex-seo.php:1886
+msgid "Search Results"
 msgstr ""
 
-#: noindex-seo.php:605
+#: noindex-seo.php:1889
+msgid "Block the indexing of search result pages."
+msgstr ""
+
+#: noindex-seo.php:1894
 msgid "Attachments"
 msgstr ""
 
-#: noindex-seo.php:608
-msgid "Attachment"
+#: noindex-seo.php:1897
+msgid "Attachment Pages"
 msgstr ""
 
-#: noindex-seo.php:611
+#: noindex-seo.php:1900
 msgid ""
-"This will block the indexing of an attachment document to a post or page. An "
-"attachment is an image or other file uploaded through the post editor's "
-"upload utility. Attachments can be displayed on their own \"page\" or "
-"template. This will not cause the indexing of the image or file to be "
-"blocked."
+"Block the indexing of attachment pages (does not affect the file itself)."
 msgstr ""
 
-#: noindex-seo.php:616
+#: noindex-seo.php:1905
 msgid "Previews"
 msgstr ""
 
-#: noindex-seo.php:619
+#: noindex-seo.php:1908
 msgid "Customize Preview"
 msgstr ""
 
-#: noindex-seo.php:622
-msgid ""
-"This will block the indexing when content is being displayed in customize "
-"mode."
+#: noindex-seo.php:1911
+msgid "Block the indexing when content is in customize preview mode."
 msgstr ""
 
-#: noindex-seo.php:625
-msgid "Preview"
+#: noindex-seo.php:1914
+msgid "Post Preview"
 msgstr ""
 
-#: noindex-seo.php:628
-msgid ""
-"This will block the indexing when a single post is being displayed in draft "
-"mode."
+#: noindex-seo.php:1917
+msgid "Block the indexing when viewing post previews."
 msgstr ""
 
-#: noindex-seo.php:633
-msgid "Error Page"
+#: noindex-seo.php:1922
+msgid "Error Pages"
 msgstr ""
 
-#: noindex-seo.php:636
+#: noindex-seo.php:1925
 msgid "Error 404"
 msgstr ""
 
-#: noindex-seo.php:639
-msgid ""
-"This will cause an error page to be blocked from being indexed. As it is an "
-"error page, it should not be indexed per se, but just in case."
+#: noindex-seo.php:1928
+msgid "Block the indexing of 404 error pages."
 msgstr ""
 
-#: noindex-seo.php:647
+#: noindex-seo.php:1947
+msgid "Prevent search engines from indexing this page"
+msgstr ""
+
+#: noindex-seo.php:1952
+msgid "Prevent search engines from following links on this page"
+msgstr ""
+
+#: noindex-seo.php:1957
+msgid "Prevent search engines from showing a cached version"
+msgstr ""
+
+#: noindex-seo.php:1962
+msgid "Prevent search engines from showing text snippets"
+msgstr ""
+
+#: noindex-seo.php:1967
+msgid "Prevent search engines from indexing images"
+msgstr ""
+
+#: noindex-seo.php:1974
 msgid "noindex SEO Settings"
 msgstr ""
 
-#: noindex-seo.php:653
+#: noindex-seo.php:1975
+msgid ""
+"Control how search engines index and display your WordPress content using "
+"robots directives."
+msgstr ""
+
+#: noindex-seo.php:1985
+msgid "Total Options"
+msgstr ""
+
+#: noindex-seo.php:1989
+msgid "Enabled"
+msgstr ""
+
+#: noindex-seo.php:1993
+msgid "Recommended to Enable"
+msgstr ""
+
+#: noindex-seo.php:2001
 msgid "General Configuration"
 msgstr ""
 
-#: noindex-seo.php:658
-msgid "Plugin compatibility"
+#: noindex-seo.php:2015
+msgid "Disable compatibility warnings with other SEO plugins"
 msgstr ""
 
-#: noindex-seo.php:661
+#: noindex-seo.php:2022
+msgid "Implementation Method"
+msgstr ""
+
+#: noindex-seo.php:2030
+msgid "HTML Meta Tags (default, easier to verify)"
+msgstr ""
+
+#: noindex-seo.php:2033
+msgid "HTTP Headers (more robust, works with PDFs/images)"
+msgstr ""
+
+#: noindex-seo.php:2036
+msgid "Both (maximum compatibility)"
+msgstr ""
+
+#: noindex-seo.php:2040
 msgid ""
-"Do not display the message of possible incompatibilities with other plugins."
+"Choose how noindex directives are sent to search engines. Meta tags work for "
+"HTML pages. HTTP headers work for all content types including PDFs, images, "
+"and feeds."
 msgstr ""
 
-#: noindex-seo.php:666
-msgid "SEO Configuration"
+#: noindex-seo.php:2058
+msgid "Enable per-post/page granular control"
 msgstr ""
 
-#: noindex-seo.php:668
+#: noindex-seo.php:2061
 msgid ""
-"Important note: if you have any doubt about any of the following items, it "
-"is best not to activate the option as you could lose results in the search "
-"engines."
+"When enabled, a meta box will appear in the post/page editor allowing you to "
+"override global settings for individual content. Useful for specific pages "
+"that need different robots directives."
 msgstr ""
 
-#: noindex-seo.php:691
-msgid "View"
+#: noindex-seo.php:2070
+msgid ""
+"Important: Enabling noindex on the wrong pages can harm your search engine "
+"rankings. Only enable options you fully understand."
+msgstr ""
+
+#: noindex-seo.php:2077
+msgid "Search options..."
+msgstr ""
+
+#: noindex-seo.php:2078
+msgid "Search options"
+msgstr ""
+
+#: noindex-seo.php:2106
+msgid "This option only works with HTTP Headers implementation method"
+msgstr ""
+
+#: noindex-seo.php:2116
+msgid "Not Recommended"
+msgstr ""
+
+#: noindex-seo.php:2122
+msgid "View Page"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -331,8 +574,9 @@ msgstr ""
 
 #. Description of the plugin/theme
 msgid ""
-"Allows adding a meta-tag for robots noindex in specific parts of your "
-"WordPress site."
+"Control search engine indexing with robots directives (noindex, nofollow, "
+"noarchive, nosnippet, noimageindex) for specific parts of your WordPress "
+"site."
 msgstr ""
 
 #. Author of the plugin/theme
