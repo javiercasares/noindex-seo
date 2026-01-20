@@ -1,10 +1,10 @@
 === noindex SEO ===
 Contributors: javiercasares
 Tags: seo, noindex
-Requires at least: 4.1
-Tested up to: 6.8
+Requires at least: 6.6
+Tested up to: 6.9
 Stable tag: 2.0.0
-Requires PHP: 5.6
+Requires PHP: 7.2
 Version: 2.0.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html

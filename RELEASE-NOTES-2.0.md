@@ -185,6 +185,63 @@ Version 2.0.0 introduces a **completely redesigned admin interface** with modern
 
 ---
 
+## ⚙️ Compatibility & Code Modernization
+
+### Updated Requirements
+
+Version 2.0.0 updates the minimum requirements to focus on modern WordPress and PHP versions:
+
+**Previous Requirements:**
+- WordPress: 4.1 - 6.8
+- PHP: 5.6 - 8.4
+
+**New Requirements:**
+- **WordPress: 6.6 - 6.9**
+- **PHP: 7.2 - 8.5**
+
+### Removed Obsolete Code
+
+As part of modernizing the codebase for WordPress 6.6+, the following obsolete code has been removed:
+
+#### WordPress < 5.7 Compatibility
+- **Removed:** Fallback for `wp_robots` filter in `noindex_seo_metarobots()`
+- **Reason:** `wp_robots` has been available since WordPress 5.7 (March 2021)
+- **Impact:** Function simplified to use `wp_robots` filter directly
+
+#### Function Existence Checks
+- **Removed:** `function_exists('is_privacy_policy')` check
+- **Reason:** `is_privacy_policy()` has been available since WordPress 5.2 (May 2019)
+- **Impact:** Direct function call without conditional check
+
+- **Removed:** `version_compare()` check for privacy policy feature
+- **Reason:** Always returns true with WordPress 6.6+
+- **Impact:** Privacy policy option always displayed in admin
+
+#### Simplified Code
+- Cleaner, more maintainable codebase
+- Reduced conditional logic
+- Improved performance (fewer runtime checks)
+- Better code readability
+
+### Why These Changes?
+
+**Security & Maintenance:**
+- Older PHP versions (5.6, 7.0, 7.1) reached end-of-life years ago
+- Focusing on supported versions improves security
+- Reduces maintenance burden of legacy compatibility code
+
+**Modern Features:**
+- Enables use of modern PHP features in future updates
+- Simplifies codebase by removing backward compatibility checks
+- Aligns with WordPress.org plugin directory recommendations
+
+**Industry Standards:**
+- PHP 7.2 released in November 2017 (7+ years old)
+- WordPress 6.6 released in July 2024
+- Both are widely deployed and well-tested
+
+---
+
 ## 📚 Documentation Improvements
 
 ### New Documentation Files
@@ -237,8 +294,8 @@ Version 2.0.0 introduces a **completely redesigned admin interface** with modern
 - ✅ Transient caching works as expected
 - ✅ Conflict detection with other SEO plugins
 - ✅ Uninstallation cleanup
-- ✅ Compatibility with WordPress 4.1 - 6.8
-- ✅ Compatibility with PHP 5.6 - 8.4
+- ✅ Compatibility with WordPress 6.6 - 6.9
+- ✅ Compatibility with PHP 7.2 - 8.5
 
 ### Security Testing
 - ✅ Authorization bypass attempts fail
@@ -268,7 +325,7 @@ Version 2.0.0 introduces a **completely redesigned admin interface** with modern
 - ✅ WordPress Coding Standards compliance
 - ✅ PHP_CodeSniffer passes
 - ✅ No PHP warnings or notices
-- ✅ PHPCompatibility checks pass (PHP 5.6-8.4)
+- ✅ PHPCompatibility checks pass (PHP 7.2-8.5)
 
 ---
 
@@ -339,7 +396,7 @@ Version 2.0.0 introduces a **completely redesigned admin interface** with modern
    vendor/bin/phpcs --standard=WordPress noindex-seo.php
 
    # PHP Compatibility
-   vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 5.6- noindex-seo.php
+   vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 7.2- noindex-seo.php
    ```
 
 4. **Update and Test**
@@ -483,10 +540,12 @@ Documentation:
 📚 Architecture documentation
 📚 Changelog in Keep a Changelog format
 
-Compatibility:
-✅ WordPress 4.1 - 6.8
-✅ PHP 5.6 - 8.4
-✅ 100% Backward Compatible
+Compatibility & Modernization:
+✅ WordPress 6.6 - 6.9 (updated from 4.1 - 6.8)
+✅ PHP 7.2 - 8.5 (updated from 5.6 - 8.4)
+✅ Removed WordPress < 5.7 compatibility code
+✅ Removed obsolete function existence checks
+✅ Simplified codebase for modern WordPress
 ```
 
 ---

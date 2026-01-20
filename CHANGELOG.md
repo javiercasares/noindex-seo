@@ -155,11 +155,25 @@ This is a major security hardening release based on a comprehensive security aud
 
 ### Compatibility
 
-- **WordPress:** 4.1 - 6.8 (no changes)
-- **PHP:** 5.6 - 8.4 (no changes)
+- **WordPress:** 6.6 - 6.9 (updated from 4.1 - 6.8)
+- **PHP:** 7.2 - 8.5 (updated from 5.6 - 8.4)
 - **Backward Compatibility:** 100% - No breaking changes
 - **Database Schema:** No changes
 - **Settings:** No changes (all existing settings preserved)
+
+### Removed
+
+#### Obsolete Code
+- **WordPress < 5.7 Fallback in `noindex_seo_metarobots()`**
+  - Removed fallback for `wp_robots` filter (now always available in WP 6.6+)
+  - Simplified function to use `wp_robots` filter directly
+
+- **Function Existence Checks**
+  - Removed `function_exists('is_privacy_policy')` check (available since WP 5.2)
+  - Removed `version_compare()` check for privacy policy feature (always available in WP 6.6+)
+
+- **Conditional Display Logic**
+  - Removed conditional display check for privacy policy option (always shown in WP 6.6+)
 
 ### Testing
 
@@ -195,7 +209,7 @@ bash docs/security-tests.sh
 vendor/bin/phpcs --standard=WordPress noindex-seo.php
 
 # PHP Compatibility
-vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 5.6- noindex-seo.php
+vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 7.2- noindex-seo.php
 ```
 
 #### Audit Documentation

@@ -3,8 +3,8 @@
  * Plugin Name: noindex SEO
  * Plugin URI: https://wordpress.org/plugins/noindex-seo/
  * Description: Allows adding a meta-tag for robots noindex in specific parts of your WordPress site.
- * Requires at least: 4.1
- * Requires PHP: 5.6
+ * Requires at least: 6.6
+ * Requires PHP: 7.2
  * Version: 2.0.0
  * Author: Javier Casares
  * Author URI: https://www.javiercasares.com/
@@ -22,31 +22,26 @@ defined( 'ABSPATH' ) || die( 'Bye bye!' );
  * Outputs a 'noindex' directive in the meta robots tag.
  *
  * This function adds a 'noindex' directive to the robots meta tag to instruct search engines
- * not to index the current page. It uses the `wp_robots` filter if available (WordPress 5.7+),
- * or falls back to echoing a raw meta tag for older WordPress versions.
+ * not to index the current page. It uses the `wp_robots` filter introduced in WordPress 5.7.
  *
  * Intended to be called only when certain conditions are met, such as in specific templates
  * or based on plugin configuration.
  *
  * @since 1.1.0
+ * @since 2.0.0 Removed fallback for WordPress < 5.7 (now requires 6.6+).
  *
  * @see https://developer.wordpress.org/reference/hooks/wp_robots/
  *
  * @return void
  */
 function noindex_seo_metarobots() {
-
-	if ( function_exists( 'wp_robots' ) ) {
-		add_filter(
-			'wp_robots',
-			function ( $robots ) {
-				$robots['noindex'] = true;
-				return $robots;
-			}
-		);
-	} else {
-		echo '<meta name="robots" content="noindex">' . "\n";
-	}
+	add_filter(
+		'wp_robots',
+		function ( $robots ) {
+			$robots['noindex'] = true;
+			return $robots;
+		}
+	);
 }
 
 /**
@@ -136,7 +131,7 @@ function noindex_seo_show() {
 		'single'            => is_single(),
 		'page'              => is_page(),
 		'attachment'        => is_attachment(),
-		'privacy_policy'    => function_exists( 'is_privacy_policy' ) ? is_privacy_policy() : false,
+		'privacy_policy'    => is_privacy_policy(),
 		'category'          => is_category(),
 		'tag'               => is_tag(),
 		'author'            => is_author(),
@@ -588,7 +583,6 @@ function noindex_seo_admin() {
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of the privacy policy page.', 'noindex-seo' ),
 					'view_url'    => get_privacy_policy_url(),
-					'conditional' => version_compare( $GLOBALS['wp_version'], '5.2', '>=' ),
 				),
 				'single'         => array(
 					'label'       => __( 'Single Post', 'noindex-seo' ),

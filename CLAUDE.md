@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a WordPress plugin that adds `noindex` meta tags to specific parts of a WordPress site based on user configuration. The plugin allows site administrators to prevent search engines from indexing various types of content such as archives, pagination, search results, attachment pages, and more.
 
 **Key Details:**
-- Plugin supports WordPress 4.1 - 6.8 and PHP 5.6 - 8.4
-- Uses native WordPress `wp_robots` function (since WP 5.7+) with fallback for older versions
+- Plugin supports WordPress 6.6 - 6.9 and PHP 7.2 - 8.5
+- Uses native WordPress `wp_robots` filter (available since WP 5.7)
 - Single main file architecture (`noindex-seo.php`)
 - Options stored in WordPress options table with transient caching
 - Text domain: `noindex-seo`
@@ -25,7 +25,7 @@ vendor/bin/phpcs --standard=WordPress noindex-seo.php
 
 Check PHP compatibility:
 ```bash
-vendor/bin/phpcs -p noindex-seo.php --standard=PHPCompatibility --runtime-set testVersion 5.6-
+vendor/bin/phpcs -p noindex-seo.php --standard=PHPCompatibility --runtime-set testVersion 7.2-
 ```
 
 Check WordPress coding standards with specific ruleset:
@@ -130,7 +130,7 @@ The plugin includes `uninstall.php` which removes all options when the plugin is
 ## Code Style Guidelines
 
 - Follow WordPress Coding Standards (WPCS)
-- Maintain compatibility with PHP 5.6+
+- Maintain compatibility with PHP 7.2+ and WordPress 6.6+
 - Use WordPress core functions (e.g., `esc_html()`, `esc_url()`, `wp_nonce_field()`)
 - All user-facing strings must be translatable with `__()` or `esc_html__()`
 - Security: Always sanitize output and validate input
