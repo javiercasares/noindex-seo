@@ -508,6 +508,18 @@ function noindex_seo_process_form(): void {
 		'year',
 	];
 
+	// Get the implementation method to validate field compatibility.
+	$method_value = isset( $_POST['noindex_seo_config_method'] )
+		? sanitize_text_field( wp_unslash( $_POST['noindex_seo_config_method'] ) )
+		: 'meta';
+
+	// Validate method.
+	$method_value = in_array( $method_value, [ 'meta', 'header', 'both' ], true ) ? $method_value : 'meta';
+
+	// Fields that only work with HTTP headers.
+	$header_only_fields = [ 'attachment', 'feed', 'comment_feed' ];
+	$is_header_enabled  = in_array( $method_value, [ 'header', 'both' ], true );
+
 	// Reset all options to 0..
 	foreach ( $settings as $setting ) {
 		update_option( 'noindex_seo_' . $setting, 0 );
@@ -517,6 +529,13 @@ function noindex_seo_process_form(): void {
 	foreach ( $settings as $setting ) {
 		$option_key   = 'noindex_seo_' . $setting;
 		$option_value = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
+
+		// Validate: header-only fields require header implementation method.
+		if ( in_array( $setting, $header_only_fields, true ) && ! $is_header_enabled ) {
+			// Force to 0 - this field doesn't work with current method.
+			update_option( $option_key, 0 );
+			continue;
+		}
 
 		// Only set to 1 if the checkbox was actually checked (value should be "1").
 		if ( '1' === $option_value ) {
@@ -534,13 +553,7 @@ function noindex_seo_process_form(): void {
 
 	update_option( 'noindex_seo_config_seoplugins', $config_value );
 
-	// Save implementation method configuration.
-	$method_value = isset( $_POST['noindex_seo_config_method'] )
-		? sanitize_text_field( wp_unslash( $_POST['noindex_seo_config_method'] ) )
-		: 'meta';
-
-	// Validate and save method (only allow valid values).
-	$method_value = in_array( $method_value, [ 'meta', 'header', 'both' ], true ) ? $method_value : 'meta';
+	// Save implementation method configuration (already validated above).
 	update_option( 'noindex_seo_config_method', $method_value );
 
 	// Clear cache..
@@ -784,6 +797,10 @@ function noindex_seo_admin(): void {
 	// Get config options.
 	$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
 	$option_config_method     = get_option( 'noindex_seo_config_method', 'meta' );
+
+	// Define fields that only work with HTTP headers (non-HTML content).
+	$header_only_fields = [ 'attachment', 'feed', 'comment_feed' ];
+	$is_header_enabled  = in_array( $option_config_method, [ 'header', 'both' ], true );
 	?>
 
 	<div class="wrap noindex-seo-admin-wrap">
@@ -900,8 +917,11 @@ function noindex_seo_admin(): void {
 
 							// Prepare badge class..
 							$badge_class = $field['suggestion'] ? 'recommended' : 'not-recommended';
+
+							// Check if field should be disabled (header-only fields with meta method).
+							$should_disable = in_array( $field_id, $header_only_fields, true ) && ! $is_header_enabled;
 							?>
-							<div class="noindex-seo-option">
+							<div class="noindex-seo-option<?php echo $should_disable ? ' disabled' : ''; ?>"<?php echo $should_disable ? ' title="' . esc_attr__( 'This option only works with HTTP Headers implementation method', 'noindex-seo' ) . '"' : ''; ?>>
 								<div class="noindex-seo-option-toggle">
 									<label class="noindex-seo-switch">
 										<input
@@ -910,6 +930,7 @@ function noindex_seo_admin(): void {
 											name="noindex_seo_<?php echo esc_attr( $field_id ); ?>"
 											value="1"
 											<?php checked( 1, $option ); ?>
+											<?php disabled( $should_disable ); ?>
 										>
 										<span class="noindex-seo-slider"></span>
 									</label>

@@ -19,6 +19,7 @@
 		initStats();
 		initFormSubmit();
 		initTooltips();
+		initMethodDependentFields();
 	}
 
 	/**
@@ -160,6 +161,62 @@
 	function initTooltips() {
 		// Tooltips are handled by title attributes.
 		// Can be enhanced with a tooltip library if needed.
+	}
+
+	/**
+	 * Initialize method-dependent field states
+	 * Some fields only work with HTTP headers, not HTML meta tags
+	 */
+	function initMethodDependentFields() {
+		const methodSelect = $( '#noindex_seo_config_method' );
+
+		if (methodSelect.length === 0) {
+			return;
+		}
+
+		/**
+		 * Update field states based on selected implementation method
+		 */
+		function updateFieldStates() {
+			const method          = methodSelect.val();
+			const isHeaderEnabled = (method === 'header' || method === 'both');
+
+			// Fields that ONLY work with HTTP headers (non-HTML content).
+			const headerOnlyFields = [
+				'attachment',    // Attachment pages (may contain PDFs, images, etc.).
+				'feed',          // RSS/Atom feeds (XML, not HTML).
+				'comment_feed'   // Comment feeds (XML, not HTML).
+			];
+
+			headerOnlyFields.forEach(
+				function (field) {
+					const checkbox = $( '#noindex_seo_' + field );
+					const option   = checkbox.closest( '.noindex-seo-option' );
+
+					if ( ! isHeaderEnabled) {
+						// Disable field and uncheck it.
+						checkbox.prop( 'disabled', true );
+						checkbox.prop( 'checked', false );
+						option.addClass( 'disabled' );
+						option.attr( 'title', 'This option only works with HTTP Headers implementation method' );
+					} else {
+						// Enable field.
+						checkbox.prop( 'disabled', false );
+						option.removeClass( 'disabled' );
+						option.removeAttr( 'title' );
+					}
+				}
+			);
+
+			// Update stats after changing field states.
+			updateStats();
+		}
+
+		// Listen for method changes.
+		methodSelect.on( 'change', updateFieldStates );
+
+		// Execute on page load.
+		updateFieldStates();
 	}
 
 	/**

@@ -539,6 +539,46 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
+	Disabled Fields
+	=========================== */
+.noindex-seo-option.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	position: relative;
+}
+
+.noindex-seo-option.disabled::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1;
+}
+
+.noindex-seo-option.disabled .noindex-seo-switch {
+	pointer-events: none;
+}
+
+.noindex-seo-option.disabled .noindex-seo-option-label label {
+	color: #9ca3af;
+	cursor: not-allowed;
+}
+
+.noindex-seo-option.disabled .noindex-seo-option-description {
+	color: #d1d5db;
+}
+
+.noindex-seo-option.disabled .noindex-seo-slider {
+	background-color: #e5e7eb;
+}
+
+.noindex-seo-option.disabled input:checked + .noindex-seo-slider {
+	background-color: #d1d5db;
+}
+
+/* ===========================
 	Print Styles
 	=========================== */
 @media print {
