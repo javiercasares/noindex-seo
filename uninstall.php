@@ -77,14 +77,35 @@ foreach ( $noindex_seo_directives as $noindex_seo_directive ) {
 }
 
 // Clean up transients.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_noindex_seo_%'" );
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_noindex_seo_%'" );
+$wpdb->query(
+	$wpdb->prepare(
+		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+		'_transient_noindex_seo_%'
+	)
+);
+$wpdb->query(
+	$wpdb->prepare(
+		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+		'_transient_timeout_noindex_seo_%'
+	)
+);
 
 // Clean up post meta (granular control).
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_override'" );
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_noindex'" );
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_nofollow'" );
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_noarchive'" );
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_nosnippet'" );
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_noimageindex'" );
+$noindex_seo_meta_keys = array(
+	'_noindex_seo_override',
+	'_noindex_seo_noindex',
+	'_noindex_seo_nofollow',
+	'_noindex_seo_noarchive',
+	'_noindex_seo_nosnippet',
+	'_noindex_seo_noimageindex',
+);
+
+foreach ( $noindex_seo_meta_keys as $noindex_seo_meta_key ) {
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s",
+			$noindex_seo_meta_key
+		)
+	);
+}
 // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

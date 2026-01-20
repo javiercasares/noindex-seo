@@ -776,9 +776,24 @@ function noindex_seo_process_form(): void {
 
 	// Reset all options to 0 and process form data.
 	foreach ( $contexts as $context ) {
+		// Validate context is in our allowed list (defense in depth).
+		if ( ! in_array( $context, $contexts, true ) ) {
+			continue; // Skip invalid context.
+		}
+
 		foreach ( $directives as $directive ) {
+			// Validate directive is in our allowed list (defense in depth).
+			if ( ! in_array( $directive, $directives, true ) ) {
+				continue; // Skip invalid directive.
+			}
+
 			$option_key   = $directive . '_seo_' . $context;
 			$option_value = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
+
+			// Additional validation: only accept '1' or empty string.
+			if ( '' !== $option_value && '1' !== $option_value ) {
+				$option_value = ''; // Invalid value, treat as unchecked.
+			}
 
 			// Validate: header-only contexts require header implementation method.
 			if ( in_array( $context, $header_only_contexts, true ) && ! $is_header_enabled ) {
@@ -1633,6 +1648,12 @@ function noindex_seo_filter_posts_by_override( WP_Query $query ): void {
 
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- URL parameter for filtering, not form data.
 	$filter = sanitize_text_field( wp_unslash( $_GET['noindex_seo_filter'] ) );
+
+	// Validate against whitelist of allowed filter values.
+	$valid_filters = array( 'with_override', 'without_override' );
+	if ( ! in_array( $filter, $valid_filters, true ) ) {
+		return; // Invalid filter value, ignore.
+	}
 
 	// Build meta query.
 	$meta_query = array();
