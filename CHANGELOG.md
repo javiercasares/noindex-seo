@@ -7,11 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - 2026-01-20 (Unreleased)
 
-### Security Hardening Release
+### Security Hardening & Feature Release
 
-This is a major security hardening release based on a comprehensive security audit conducted on 2026-01-20. All identified vulnerabilities have been addressed with no breaking changes to existing functionality.
+This is a major release that includes comprehensive security hardening and a new flexible implementation method for noindex directives. All identified vulnerabilities have been addressed with no breaking changes to existing functionality.
 
 **Security Audit Score:** 7.5/10 → 9.5/10 (after patches)
+
+### Added
+
+#### Flexible Implementation Methods
+- **HTTP X-Robots-Tag Headers Support**
+  - New option to send noindex directives via HTTP headers
+  - Works with all content types (HTML, PDFs, images, feeds, attachments)
+  - More robust and efficient than HTML meta tags
+  - Ideal for WordPress attachments and non-HTML content
+
+- **Implementation Method Selection**
+  - Three implementation options:
+    - `meta`: HTML meta tags via wp_robots filter (default)
+    - `header`: HTTP X-Robots-Tag headers
+    - `both`: Both methods for maximum compatibility
+  - User-configurable in General Configuration section
+  - Default is HTML meta tags for backward compatibility
+  - Automatic sanitization and validation of method selection
+
+- **Enhanced `noindex_seo_metarobots()` Function**
+  - Now accepts `$method` parameter to control implementation
+  - Supports 'meta', 'header', or 'both' methods
+  - Checks `headers_sent()` before sending HTTP headers
+  - Updated PHPDoc with detailed method documentation
 
 ### Security
 

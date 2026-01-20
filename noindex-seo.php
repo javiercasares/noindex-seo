@@ -19,29 +19,49 @@
 defined( 'ABSPATH' ) || die( 'Bye bye!' );
 
 /**
- * Outputs a 'noindex' directive in the meta robots tag.
+ * Outputs a 'noindex' directive using the configured implementation method.
  *
- * This function adds a 'noindex' directive to the robots meta tag to instruct search engines
- * not to index the current page. It uses the `wp_robots` filter introduced in WordPress 5.7.
+ * This function adds a 'noindex' directive to instruct search engines not to index
+ * the current page. It supports three implementation methods:
  *
- * Intended to be called only when certain conditions are met, such as in specific templates
- * or based on plugin configuration.
+ * - 'meta': HTML meta tags via wp_robots filter (default)
+ * - 'header': HTTP X-Robots-Tag header
+ * - 'both': Both HTML meta tags and HTTP headers
+ *
+ * The HTTP header method is more robust and works with non-HTML content (PDFs, images, feeds).
+ * The meta tag method is more visible and easier for users to verify.
  *
  * @since 1.1.0
  * @since 2.0.0 Removed fallback for WordPress < 5.7 (now requires 6.6+).
+ * @since 2.0.0 Added support for HTTP X-Robots-Tag headers and multiple implementation methods.
  *
  * @see https://developer.wordpress.org/reference/hooks/wp_robots/
+ * @see https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag
  *
+ * @param string $method Implementation method: 'meta', 'header', or 'both'. Default 'meta'.
  * @return void
  */
-function noindex_seo_metarobots() {
-	add_filter(
-		'wp_robots',
-		function ( $robots ) {
-			$robots['noindex'] = true;
-			return $robots;
+function noindex_seo_metarobots( $method = 'meta' ) {
+	// Sanitize method.
+	$method = in_array( $method, array( 'meta', 'header', 'both' ), true ) ? $method : 'meta';
+
+	// Send HTTP header if requested.
+	if ( in_array( $method, array( 'header', 'both' ), true ) ) {
+		if ( ! headers_sent() ) {
+			header( 'X-Robots-Tag: noindex', false );
 		}
-	);
+	}
+
+	// Add HTML meta tag if requested.
+	if ( in_array( $method, array( 'meta', 'both' ), true ) ) {
+		add_filter(
+			'wp_robots',
+			function ( $robots ) {
+				$robots['noindex'] = true;
+				return $robots;
+			}
+		);
+	}
 }
 
 /**
@@ -152,6 +172,9 @@ function noindex_seo_show() {
 		'customize_preview' => is_customize_preview(),
 	);
 
+	// Get implementation method configuration.
+	$implementation_method = get_option( 'noindex_seo_config_method', 'meta' );
+
 	// Iterate through the contexts and apply 'noindex' if the condition and setting are true.
 	foreach ( $contexts as $context => $option_key ) {
 
@@ -161,7 +184,7 @@ function noindex_seo_show() {
 			isset( $options[ $option_key ] ) &&
 			(bool) $options[ $option_key ]
 		) {
-			noindex_seo_metarobots();
+			noindex_seo_metarobots( $implementation_method );
 
 			break; // Prevent multiple meta tags from being added.
 		}
@@ -334,6 +357,18 @@ function noindex_seo_register() {
 		)
 	);
 
+	register_setting(
+		'noindexseo',
+		'noindex_seo_config_method',
+		array(
+			'type'              => 'string',
+			'default'           => 'meta',
+			'sanitize_callback' => function ( $value ) {
+				return in_array( $value, array( 'meta', 'header', 'both' ), true ) ? $value : 'meta';
+			},
+		)
+	);
+
 	// Hook to settings update to clear transient cache..
 	// Note: Hook receives $old_value and $value parameters but we don't need them.
 	add_action( 'update_option_noindexseo', 'noindex_seo_clear_transient', 10, 0 );
@@ -497,6 +532,15 @@ function noindex_seo_process_form() {
 	$config_value = ( 1 === $config_value ) ? 1 : 0;
 
 	update_option( 'noindex_seo_config_seoplugins', $config_value );
+
+	// Save implementation method configuration.
+	$method_value = isset( $_POST['noindex_seo_config_method'] )
+		? sanitize_text_field( wp_unslash( $_POST['noindex_seo_config_method'] ) )
+		: 'meta';
+
+	// Validate and save method (only allow valid values).
+	$method_value = in_array( $method_value, array( 'meta', 'header', 'both' ), true ) ? $method_value : 'meta';
+	update_option( 'noindex_seo_config_method', $method_value );
 
 	// Clear cache..
 	delete_transient( 'noindex_seo_options' );
@@ -736,8 +780,9 @@ function noindex_seo_admin() {
 		),
 	);
 
-	// Get config option..
+	// Get config options.
 	$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
+	$option_config_method     = get_option( 'noindex_seo_config_method', 'meta' );
 	?>
 
 	<div class="wrap noindex-seo-admin-wrap">
@@ -784,6 +829,32 @@ function noindex_seo_admin() {
 					<label for="noindex_seo_config_seoplugins">
 						<?php esc_html_e( 'Disable compatibility warnings with other SEO plugins', 'noindex-seo' ); ?>
 					</label>
+				</div>
+
+				<div class="noindex-seo-config-option" style="margin-top: 20px;">
+					<div style="flex: 1;">
+						<label for="noindex_seo_config_method" style="display: block; font-weight: 600; margin-bottom: 8px; color: #92400e;">
+							<?php esc_html_e( 'Implementation Method', 'noindex-seo' ); ?>
+						</label>
+						<select
+							id="noindex_seo_config_method"
+							name="noindex_seo_config_method"
+							style="width: 100%; max-width: 400px; padding: 8px; border: 1px solid #fcd34d; border-radius: 4px; background: #fff; color: #78350f;"
+						>
+							<option value="meta" <?php selected( $option_config_method, 'meta' ); ?>>
+								<?php esc_html_e( 'HTML Meta Tags (default, easier to verify)', 'noindex-seo' ); ?>
+							</option>
+							<option value="header" <?php selected( $option_config_method, 'header' ); ?>>
+								<?php esc_html_e( 'HTTP Headers (more robust, works with PDFs/images)', 'noindex-seo' ); ?>
+							</option>
+							<option value="both" <?php selected( $option_config_method, 'both' ); ?>>
+								<?php esc_html_e( 'Both (maximum compatibility)', 'noindex-seo' ); ?>
+							</option>
+						</select>
+						<p style="margin: 8px 0 0 0; font-size: 13px; color: #92400e; line-height: 1.5;">
+							<?php esc_html_e( 'Choose how noindex directives are sent to search engines. Meta tags work for HTML pages. HTTP headers work for all content types including PDFs, images, and feeds.', 'noindex-seo' ); ?>
+						</p>
+					</div>
 				</div>
 			</div>
 

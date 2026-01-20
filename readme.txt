@@ -9,11 +9,25 @@ Version: 2.0.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
-Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
+Allows to add noindex directives for robots in some parts of your WordPress site using HTML meta tags or HTTP headers.
 
 == Description ==
 
-Allows to add a meta-tag for robots noindex in some parts of your WordPress site.
+Control search engine indexing with flexible implementation methods. Choose between HTML meta tags, HTTP X-Robots-Tag headers, or both for maximum compatibility.
+
+**Implementation Methods:**
+
+* HTML Meta Tags: Traditional method, easy to verify in page source (default)
+* HTTP Headers: More robust, works with all content types including PDFs and images
+* Both: Maximum compatibility for all scenarios
+
+**Perfect for:**
+
+* Blocking indexing of attachment pages
+* Preventing duplicate content issues
+* Controlling archive page indexing
+* Managing pagination SEO
+* Protecting private or draft content from search engines
 
 **Main pages**
 
