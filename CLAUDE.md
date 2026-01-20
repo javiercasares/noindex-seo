@@ -61,6 +61,24 @@ wp i18n make-pot . languages/noindex-seo.pot
 
 The plugin is translation-ready with text domain `noindex-seo` and domain path `/languages`.
 
+### Build & Release
+
+Create a distributable ZIP package:
+```bash
+./bin/build.sh VERSION
+```
+
+Example:
+```bash
+./bin/build.sh 2.0.0
+```
+
+This creates `noindex-seo-VERSION.zip` in the parent directory with only necessary files:
+- Excludes: `.git/`, `vendor/`, `docs/`, `bin/`, `*.md`, development configs
+- Includes: plugin files, `assets/`, `languages/`, `readme.txt`
+
+See `bin/README.md` for detailed documentation.
+
 ## Architecture
 
 ### Main Components
