@@ -1080,6 +1080,17 @@ function noindex_seo_admin(): void {
 								<div class="noindex-seo-option-header">
 									<div class="noindex-seo-option-title">
 										<strong><?php echo esc_html( $field['label'] ); ?></strong>
+										<?php if ( isset( $field['suggestion'] ) ) : ?>
+											<span class="noindex-seo-badge <?php echo $field['suggestion'] ? 'recommended' : 'not-recommended'; ?>">
+												<?php
+												if ( $field['suggestion'] ) {
+													esc_html_e( 'Recommended', 'noindex-seo' );
+												} else {
+													esc_html_e( 'Not Recommended', 'noindex-seo' );
+												}
+												?>
+											</span>
+										<?php endif; ?>
 										<?php if ( isset( $field['view_url'] ) && ! empty( $field['view_url'] ) ) : ?>
 											<a href="<?php echo esc_url( $field['view_url'] ); ?>" target="_blank" class="noindex-seo-view-link" title="<?php esc_attr_e( 'View Page', 'noindex-seo' ); ?>">
 												<span class="dashicons dashicons-external"></span>
