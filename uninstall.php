@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Delete all noindex context options.
-$context_options = [
+$context_options = array(
 	'noindex_seo_archive',
 	'noindex_seo_attachment',
 	'noindex_seo_author',
@@ -44,7 +44,7 @@ $context_options = [
 	'noindex_seo_tag',
 	'noindex_seo_time',
 	'noindex_seo_year',
-];
+);
 
 foreach ( $context_options as $option ) {
 	delete_option( $option );
@@ -59,6 +59,12 @@ delete_transient( 'noindex_seo_options' );
 
 // Clean up any leftover options (in case of partial uninstall).
 global $wpdb;
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+// Direct database queries are necessary here for complete cleanup during uninstall.
+// This is a DELETE operation (not SELECT), so caching is not applicable.
+// Using wildcards with delete_option() is not possible, requiring direct SQL.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'noindex_seo_%'" );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_noindex_seo_%'" );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_noindex_seo_%'" );
+// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

@@ -45,16 +45,16 @@ defined( 'ABSPATH' ) || die( 'Bye bye!' );
  */
 function noindex_seo_metarobots( string $method = 'meta' ): void {
 	// Sanitize method.
-	$valid_methods = [ 'meta', 'header', 'both' ];
+	$valid_methods = array( 'meta', 'header', 'both' );
 	$method        = in_array( $method, $valid_methods, true ) ? $method : 'meta';
 
 	// Send HTTP header if requested.
-	if ( in_array( $method, [ 'header', 'both' ], true ) && ! headers_sent() ) {
+	if ( in_array( $method, array( 'header', 'both' ), true ) && ! headers_sent() ) {
 		header( 'X-Robots-Tag: noindex', false );
 	}
 
 	// Add HTML meta tag if requested.
-	if ( in_array( $method, [ 'meta', 'both' ], true ) ) {
+	if ( in_array( $method, array( 'meta', 'both' ), true ) ) {
 		add_filter(
 			'wp_robots',
 			function ( array $robots ): array {
@@ -93,7 +93,7 @@ function noindex_seo_show(): void {
 	 */
 	$contexts = apply_filters(
 		'noindex_seo_contexts',
-		[
+		array(
 			'single'            => 'noindex_seo_single',
 			'page'              => 'noindex_seo_page',
 			'privacy_policy'    => 'noindex_seo_privacy_policy',
@@ -116,7 +116,7 @@ function noindex_seo_show(): void {
 			'preview'           => 'noindex_seo_preview',
 			'customize_preview' => 'noindex_seo_customize_preview',
 			'time'              => 'noindex_seo_time',
-		]
+		)
 	);
 
 	// Validate filtered contexts to prevent injection of invalid option names.
@@ -129,7 +129,7 @@ function noindex_seo_show(): void {
 		}
 	} else {
 		// If contexts is not an array after filtering, reset to defaults.
-		$contexts = [];
+		$contexts = array();
 	}
 
 	// Try to get the options from the transient.
@@ -137,7 +137,7 @@ function noindex_seo_show(): void {
 
 	if ( false === $options || empty( $options ) ) {
 		// Transient not set, retrieve options from the database.
-		$options = [];
+		$options = array();
 
 		foreach ( $contexts as $context => $option_key ) {
 			$options[ $option_key ] = get_option( $option_key, 0 );
@@ -148,7 +148,7 @@ function noindex_seo_show(): void {
 	}
 
 	// Define current conditions, ordered from most specific to most general.
-	$current_conditions = [
+	$current_conditions = array(
 		'single'            => is_single(),
 		'page'              => is_page(),
 		'attachment'        => is_attachment(),
@@ -171,7 +171,7 @@ function noindex_seo_show(): void {
 		'paged'             => is_paged() && ! is_front_page() && ! is_home(),
 		'preview'           => is_preview(),
 		'customize_preview' => is_customize_preview(),
-	];
+	);
 
 	// Get implementation method configuration.
 	$implementation_method = get_option( 'noindex_seo_config_method', 'meta' );
@@ -221,7 +221,7 @@ function noindex_seo_enqueue_admin_assets( string $hook ): void {
 	wp_enqueue_style(
 		'noindex-seo-admin',
 		plugins_url( 'assets/css/admin.css', __FILE__ ),
-		[],
+		array(),
 		'2.0.0',
 		'all'
 	);
@@ -230,7 +230,7 @@ function noindex_seo_enqueue_admin_assets( string $hook ): void {
 	wp_enqueue_script(
 		'noindex-seo-admin',
 		plugins_url( 'assets/js/admin.js', __FILE__ ),
-		[ 'jquery' ],
+		array( 'jquery' ),
 		'2.0.0',
 		true
 	);
@@ -239,11 +239,11 @@ function noindex_seo_enqueue_admin_assets( string $hook ): void {
 	wp_localize_script(
 		'noindex-seo-admin',
 		'noindexSeoAdmin',
-		[
+		array(
 			'successMessage' => __( 'Settings saved successfully!', 'noindex-seo' ),
 			'expandAll'      => __( 'Expand All', 'noindex-seo' ),
 			'collapseAll'    => __( 'Collapse All', 'noindex-seo' ),
-		]
+		)
 	);
 }
 
@@ -309,7 +309,7 @@ function noindex_seo_menu(): void {
  * @return void
  */
 function noindex_seo_register(): void {
-	$settings = [
+	$settings = array(
 		'error',
 		'archive',
 		'attachment',
@@ -335,39 +335,39 @@ function noindex_seo_register(): void {
 		'tag',
 		'time',
 		'year',
-	];
+	);
 
 	foreach ( $settings as $setting ) {
 
 		register_setting(
 			'noindexseo',
 			'noindex_seo_' . $setting,
-			[
+			array(
 				'type'    => 'integer',
 				'default' => 0,
-			]
+			)
 		);
 	}
 
 	register_setting(
 		'noindexseo',
 		'noindex_seo_config_seoplugins',
-		[
+		array(
 			'type'    => 'integer',
 			'default' => 0,
-		]
+		)
 	);
 
 	register_setting(
 		'noindexseo',
 		'noindex_seo_config_method',
-		[
+		array(
 			'type'              => 'string',
 			'default'           => 'meta',
 			'sanitize_callback' => function ( $value ): string {
-				return in_array( $value, [ 'meta', 'header', 'both' ], true ) ? $value : 'meta';
+				return in_array( $value, array( 'meta', 'header', 'both' ), true ) ? $value : 'meta';
 			},
-		]
+		)
 	);
 
 	// Hook to settings update to clear transient cache..
@@ -428,7 +428,7 @@ function noindex_seo_detect_conflicts(): void {
 		}
 
 		// Define an associative array of conflicting plugins: slug/file => real plugin name..
-		$conflicting_plugins = [
+		$conflicting_plugins = array(
 			'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
 			'premium-seo-pack/index.php'                  => 'Premium SEO Pack',
 			'seo-by-rank-math/rank-math.php'              => 'Rank Math SEO',
@@ -437,7 +437,7 @@ function noindex_seo_detect_conflicts(): void {
 			'squirrly-seo/squirrly.php'                   => 'Squirrly SEO',
 			'autodescription/autodescription.php'         => 'The SEO Framework',
 			'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
-		];
+		);
 
 		// Iterate through the conflicting plugins to check if any are active..
 		foreach ( $conflicting_plugins as $plugin_path => $plugin_name ) {
@@ -480,7 +480,7 @@ function noindex_seo_process_form(): void {
 		wp_die( esc_html__( 'Permission denied or invalid nonce.', 'noindex-seo' ) );
 	}
 
-	$settings = [
+	$settings = array(
 		'error',
 		'archive',
 		'attachment',
@@ -506,7 +506,7 @@ function noindex_seo_process_form(): void {
 		'tag',
 		'time',
 		'year',
-	];
+	);
 
 	// Get the implementation method to validate field compatibility.
 	$method_value = isset( $_POST['noindex_seo_config_method'] )
@@ -514,11 +514,11 @@ function noindex_seo_process_form(): void {
 		: 'meta';
 
 	// Validate method.
-	$method_value = in_array( $method_value, [ 'meta', 'header', 'both' ], true ) ? $method_value : 'meta';
+	$method_value = in_array( $method_value, array( 'meta', 'header', 'both' ), true ) ? $method_value : 'meta';
 
 	// Fields that only work with HTTP headers.
-	$header_only_fields = [ 'attachment', 'feed', 'comment_feed' ];
-	$is_header_enabled  = in_array( $method_value, [ 'header', 'both' ], true );
+	$header_only_fields = array( 'attachment', 'feed', 'comment_feed' );
+	$is_header_enabled  = in_array( $method_value, array( 'header', 'both' ), true );
 
 	// Reset all options to 0..
 	foreach ( $settings as $setting ) {
@@ -587,12 +587,12 @@ function noindex_seo_admin(): void {
 		wp_die(
 			esc_html__( 'You do not have sufficient permissions to access this page.', 'noindex-seo' ),
 			esc_html__( 'Permission Denied', 'noindex-seo' ),
-			[ 'response' => 403 ]
+			array( 'response' => 403 )
 		);
 	}
 
 	// Define section icons (using Dashicons)..
-	$section_icons = [
+	$section_icons = array(
 		'main_pages'  => 'dashicons-admin-home',
 		'pages_posts' => 'dashicons-admin-page',
 		'taxonomies'  => 'dashicons-category',
@@ -603,204 +603,204 @@ function noindex_seo_admin(): void {
 		'attachments' => 'dashicons-paperclip',
 		'previews'    => 'dashicons-visibility',
 		'error_page'  => 'dashicons-warning',
-	];
+	);
 
 	// Define sections and their respective settings..
-	$sections = [
-		'main_pages'  => [
+	$sections = array(
+		'main_pages'  => array(
 			'title'  => __( 'Main Pages', 'noindex-seo' ),
-			'fields' => [
-				'front_page' => [
+			'fields' => array(
+				'front_page' => array(
 					'label'       => __( 'Front Page', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of the site\'s front page.', 'noindex-seo' ),
 					'view_url'    => get_site_url(),
-				],
-				'home'       => [
+				),
+				'home'       => array(
 					'label'       => __( 'Home', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of the site\'s home page.', 'noindex-seo' ),
 					'view_url'    => get_home_url(),
-				],
-			],
-		],
-		'pages_posts' => [
+				),
+			),
+		),
+		'pages_posts' => array(
 			'title'  => __( 'Pages and Posts', 'noindex-seo' ),
-			'fields' => [
-				'page'           => [
+			'fields' => array(
+				'page'           => array(
 					'label'       => __( 'Page', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of site pages.', 'noindex-seo' ),
-				],
-				'privacy_policy' => [
+				),
+				'privacy_policy' => array(
 					'label'       => __( 'Privacy Policy', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of the privacy policy page.', 'noindex-seo' ),
 					'view_url'    => get_privacy_policy_url(),
-				],
-				'single'         => [
+				),
+				'single'         => array(
 					'label'       => __( 'Single Post', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of individual posts.', 'noindex-seo' ),
-				],
-				'singular'       => [
+				),
+				'singular'       => array(
 					'label'       => __( 'Singular', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of any singular content (post or page).', 'noindex-seo' ),
-				],
-			],
-		],
-		'taxonomies'  => [
+				),
+			),
+		),
+		'taxonomies'  => array(
 			'title'  => __( 'Taxonomies', 'noindex-seo' ),
-			'fields' => [
-				'category' => [
+			'fields' => array(
+				'category' => array(
 					'label'       => __( 'Category', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of category archive pages.', 'noindex-seo' ),
-				],
-				'tag'      => [
+				),
+				'tag'      => array(
 					'label'       => __( 'Tag', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of tag archive pages.', 'noindex-seo' ),
-				],
-			],
-		],
-		'dates'       => [
+				),
+			),
+		),
+		'dates'       => array(
 			'title'  => __( 'Date Archives', 'noindex-seo' ),
-			'fields' => [
-				'date'  => [
+			'fields' => array(
+				'date'  => array(
 					'label'       => __( 'Date', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of any date-based archive page.', 'noindex-seo' ),
-				],
-				'day'   => [
+				),
+				'day'   => array(
 					'label'       => __( 'Day', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of daily archive pages.', 'noindex-seo' ),
-				],
-				'month' => [
+				),
+				'month' => array(
 					'label'       => __( 'Month', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of monthly archive pages.', 'noindex-seo' ),
-				],
-				'time'  => [
+				),
+				'time'  => array(
 					'label'       => __( 'Time', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of time-based archive pages.', 'noindex-seo' ),
-				],
-				'year'  => [
+				),
+				'year'  => array(
 					'label'       => __( 'Year', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of yearly archive pages.', 'noindex-seo' ),
-				],
-			],
-		],
-		'archives'    => [
+				),
+			),
+		),
+		'archives'    => array(
 			'title'  => __( 'Archives', 'noindex-seo' ),
-			'fields' => [
-				'archive'           => [
+			'fields' => array(
+				'archive'           => array(
 					'label'       => __( 'Archive', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of any type of archive page.', 'noindex-seo' ),
-				],
-				'author'            => [
+				),
+				'author'            => array(
 					'label'       => __( 'Author', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of author archive pages.', 'noindex-seo' ),
-				],
-				'post_type_archive' => [
+				),
+				'post_type_archive' => array(
 					'label'       => __( 'Post Type Archive', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
 					'description' => __( 'Block the indexing of post type archive pages.', 'noindex-seo' ),
-				],
-			],
-		],
-		'pagination'  => [
+				),
+			),
+		),
+		'pagination'  => array(
 			'title'  => __( 'Pagination', 'noindex-seo' ),
-			'fields' => [
-				'paged' => [
+			'fields' => array(
+				'paged' => array(
 					'label'       => __( 'Paginated Pages', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of pagination pages (page 2, 3, etc.).', 'noindex-seo' ),
-				],
-			],
-		],
-		'search'      => [
+				),
+			),
+		),
+		'search'      => array(
 			'title'  => __( 'Search', 'noindex-seo' ),
-			'fields' => [
-				'search' => [
+			'fields' => array(
+				'search' => array(
 					'label'       => __( 'Search Results', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of search result pages.', 'noindex-seo' ),
-				],
-			],
-		],
-		'attachments' => [
+				),
+			),
+		),
+		'attachments' => array(
 			'title'  => __( 'Attachments', 'noindex-seo' ),
-			'fields' => [
-				'attachment' => [
+			'fields' => array(
+				'attachment' => array(
 					'label'       => __( 'Attachment Pages', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of attachment pages (does not affect the file itself).', 'noindex-seo' ),
-				],
-			],
-		],
-		'previews'    => [
+				),
+			),
+		),
+		'previews'    => array(
 			'title'  => __( 'Previews', 'noindex-seo' ),
-			'fields' => [
-				'customize_preview' => [
+			'fields' => array(
+				'customize_preview' => array(
 					'label'       => __( 'Customize Preview', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing when content is in customize preview mode.', 'noindex-seo' ),
-				],
-				'preview'           => [
+				),
+				'preview'           => array(
 					'label'       => __( 'Post Preview', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing when viewing post previews.', 'noindex-seo' ),
-				],
-			],
-		],
-		'error_page'  => [
+				),
+			),
+		),
+		'error_page'  => array(
 			'title'  => __( 'Error Pages', 'noindex-seo' ),
-			'fields' => [
-				'error' => [
+			'fields' => array(
+				'error' => array(
 					'label'       => __( 'Error 404', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
 					'description' => __( 'Block the indexing of 404 error pages.', 'noindex-seo' ),
-				],
-			],
-		],
-	];
+				),
+			),
+		),
+	);
 
 	// Get config options.
 	$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
 	$option_config_method     = get_option( 'noindex_seo_config_method', 'meta' );
 
 	// Define fields that only work with HTTP headers (non-HTML content).
-	$header_only_fields = [ 'attachment', 'feed', 'comment_feed' ];
-	$is_header_enabled  = in_array( $option_config_method, [ 'header', 'both' ], true );
+	$header_only_fields = array( 'attachment', 'feed', 'comment_feed' );
+	$is_header_enabled  = in_array( $option_config_method, array( 'header', 'both' ), true );
 	?>
 
 	<div class="wrap noindex-seo-admin-wrap">
