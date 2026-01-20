@@ -130,10 +130,13 @@ This is a major release with comprehensive security hardening and powerful new r
 * Multiple directives combined in single meta tag or HTTP header
 * **Granular Per-Post/Page Control (Optional)**:
   * Enable per-content overrides in settings
-  * Meta boxes in post/page/CPT editors
+  * Meta boxes in post/page/CPT editors (Classic Editor)
+  * Native Gutenberg sidebar panel (Block Editor)
+  * Live preview showing effective directives
   * Custom "Robots" column in post lists
   * Quick Edit support for fast inline editing
   * Bulk actions to enable/disable overrides on multiple posts
+  * Filter posts by override status
 
 **🔒 Security Improvements**
 

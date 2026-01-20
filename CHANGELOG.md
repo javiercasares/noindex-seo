@@ -114,6 +114,49 @@ This is a major release that includes comprehensive security hardening and a new
   - JavaScript only loads in admin post list screens
   - Bulk actions process multiple posts efficiently
 
+#### Granular Per-Post/Page Control (Phase 3: Gutenberg & Advanced Features)
+- **Native Gutenberg Sidebar Panel**
+  - Full integration with WordPress Block Editor
+  - PluginDocumentSettingPanel in editor sidebar
+  - Real-time updates using `@wordpress/data` hooks
+  - Same interface as meta box (override toggle + 5 checkboxes)
+  - Live preview showing active directives as code
+  - Visual feedback with color-coded preview box
+  - Uses WordPress components (CheckboxControl, PanelRow)
+  - Fully accessible and keyboard-navigable
+
+- **REST API Integration**
+  - All post meta fields registered with REST API support
+  - `show_in_rest` enabled for Gutenberg access
+  - Auth callback ensures only users with `edit_posts` can modify
+  - Proper type declaration (integer) for validation
+  - Automatic sanitization and validation
+
+- **Advanced List Filtering**
+  - Filter dropdown in post list: "All", "With override", "Without override"
+  - Integrates with WordPress native `restrict_manage_posts` action
+  - Efficient meta queries to filter posts by override status
+  - Preserves other filters and search parameters
+  - Works with pagination
+
+- **Enhanced Preview in Meta Box**
+  - Visual "Effective Directives" section shows what will be applied
+  - Color-coded boxes:
+    - Blue: Override active with directives
+    - Yellow: Override enabled but no directives selected
+    - Gray: Global settings will apply
+    - Green: No restrictions (indexable)
+  - Shows actual directive code that will be output
+  - Updates dynamically as user changes selections
+  - Clear distinction between override and global settings
+
+- **JavaScript Asset Management**
+  - Conditional loading of editor sidebar script
+  - Only loads in Block Editor screens
+  - Dependencies properly declared (wp-plugins, wp-edit-post, wp-components, etc.)
+  - Translation-ready with `wp_set_script_translations()`
+  - ES5-compatible for broad browser support
+
 ### Security
 
 #### Fixed - High Severity
@@ -355,6 +398,47 @@ This is a major release that includes comprehensive security hardening and a new
     - Shows count of posts updated with proper plural forms
     - Dismissible notices
     - Registered on `admin_notices` action
+
+14. **`noindex_seo_register_post_meta()`**
+    - Registers all post meta fields with REST API support
+    - Enables Gutenberg sidebar panel to read/write values
+    - Includes auth callback for permission checks
+    - Registers for all public post types
+    - Registered on `init` hook
+
+15. **`noindex_seo_enqueue_editor_assets()`**
+    - Enqueues Gutenberg sidebar panel JavaScript
+    - Only loads in Block Editor screens
+    - Declares dependencies (wp-plugins, wp-edit-post, wp-components, wp-data, wp-i18n)
+    - Sets up script translations
+    - Only runs if granular control is enabled
+    - Registered on `enqueue_block_editor_assets` hook
+
+16. **`noindex_seo_add_list_filter()`**
+    - Adds filter dropdown to post list tables
+    - Three options: All, With override, Without override
+    - Uses WordPress native select styling
+    - Preserves selected value across page loads
+    - Registered via `restrict_manage_posts` action
+
+17. **`noindex_seo_filter_posts_by_override()`**
+    - Filters posts query based on override status
+    - Uses meta_query for efficient database filtering
+    - Handles "with override" and "without override" cases
+    - Only runs in admin list views on main query
+    - Registered on `pre_get_posts` hook
+
+#### Added Assets
+
+1. **`assets/js/editor-sidebar.js`**
+   - Gutenberg sidebar panel implementation
+   - Uses modern WordPress components API
+   - Real-time updates with `useSelect` and `useDispatch` hooks
+   - Override toggle with conditional directive display
+   - Live preview showing active directives as code
+   - Color-coded preview box with visual feedback
+   - Translation-ready with `wp.i18n`
+   - ES5-compatible for broad browser support
 
 ### Compatibility & Migration
 

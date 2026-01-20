@@ -403,6 +403,55 @@ function noindex_seo_enqueue_admin_assets( string $hook ): void {
 }
 
 /**
+ * Enqueue Gutenberg sidebar panel assets.
+ *
+ * Loads the JavaScript for the native Gutenberg sidebar panel
+ * that allows editing robots directives in the Block Editor.
+ *
+ * @since 2.0.0
+ *
+ * @return void
+ */
+function noindex_seo_enqueue_editor_assets(): void {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return;
+	}
+
+	// Get the current screen.
+	$screen = get_current_screen();
+
+	// Only load in block editor for supported post types.
+	if ( ! $screen || ! $screen->is_block_editor() ) {
+		return;
+	}
+
+	// Enqueue editor sidebar script.
+	wp_enqueue_script(
+		'noindex-seo-editor-sidebar',
+		plugins_url( 'assets/js/editor-sidebar.js', __FILE__ ),
+		array(
+			'wp-plugins',
+			'wp-edit-post',
+			'wp-element',
+			'wp-components',
+			'wp-data',
+			'wp-i18n',
+		),
+		'2.0.0',
+		true
+	);
+
+	// Set up translations for the script.
+	wp_set_script_translations(
+		'noindex-seo-editor-sidebar',
+		'noindex-seo'
+	);
+}
+add_action( 'enqueue_block_editor_assets', 'noindex_seo_enqueue_editor_assets' );
+
+/**
  * Adds a "Settings" link to the plugin row actions on the Plugins admin screen.
  *
  * This function appends a direct link to the plugin's settings page within the list of action links
@@ -745,6 +794,57 @@ function noindex_seo_process_form(): void {
 add_action( 'admin_post_update_noindex_seo', 'noindex_seo_process_form' );
 
 /**
+ * Register post meta for REST API and Gutenberg support.
+ *
+ * Registers all robots directive post meta fields with REST API support
+ * to enable Gutenberg sidebar panel to read and write values.
+ *
+ * @since 2.0.0
+ *
+ * @return void
+ */
+function noindex_seo_register_post_meta(): void {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return;
+	}
+
+	// Get all public post types.
+	$post_types = get_post_types( array( 'public' => true ), 'names' );
+
+	// Meta fields to register.
+	$meta_fields = array(
+		'_noindex_seo_override',
+		'_noindex_seo_noindex',
+		'_noindex_seo_nofollow',
+		'_noindex_seo_noarchive',
+		'_noindex_seo_nosnippet',
+		'_noindex_seo_noimageindex',
+	);
+
+	// Register each meta field for each post type.
+	foreach ( $post_types as $post_type ) {
+		foreach ( $meta_fields as $meta_key ) {
+			register_post_meta(
+				$post_type,
+				$meta_key,
+				array(
+					'show_in_rest'  => true,
+					'single'        => true,
+					'type'          => 'integer',
+					'default'       => 0,
+					'auth_callback' => function () {
+						return current_user_can( 'edit_posts' );
+					},
+				)
+			);
+		}
+	}
+}
+add_action( 'init', 'noindex_seo_register_post_meta' );
+
+/**
  * Register meta boxes for granular per-post/page control.
  *
  * Only registers meta boxes if granular control is enabled in settings.
@@ -858,12 +958,55 @@ function noindex_seo_render_meta_box( WP_Post $post ): void {
 			</div>
 		</div>
 
-		<?php if ( ! empty( $global_directives ) ) : ?>
-			<p class="description" style="margin: 8px 0 0 0; font-size: 11px; color: #666; border-top: 1px solid #f0f0f0; padding-top: 8px;">
-				<strong><?php esc_html_e( 'Current global:', 'noindex-seo' ); ?></strong>
-				<?php echo esc_html( implode( ', ', $global_directives ) ); ?>
+		<!-- Information Section -->
+		<div style="margin-top: 12px; padding: 10px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px;">
+			<p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 600; color: #333;">
+				<?php esc_html_e( 'Effective Directives:', 'noindex-seo' ); ?>
 			</p>
-		<?php endif; ?>
+
+			<?php if ( $override ) : ?>
+				<?php
+				// Show what will be applied with override.
+				$active_directives = array();
+				if ( $noindex ) {
+					$active_directives[] = 'noindex';
+				}
+				if ( $nofollow ) {
+					$active_directives[] = 'nofollow';
+				}
+				if ( $noarchive ) {
+					$active_directives[] = 'noarchive';
+				}
+				if ( $nosnippet ) {
+					$active_directives[] = 'nosnippet';
+				}
+				if ( $noimageindex ) {
+					$active_directives[] = 'noimageindex';
+				}
+				?>
+				<?php if ( ! empty( $active_directives ) ) : ?>
+					<p style="margin: 0 0 4px 0; padding: 6px; background: #e3f2fd; border-left: 3px solid #2196f3; font-size: 11px;">
+						<strong style="color: #1976d2;"><?php esc_html_e( 'Override active:', 'noindex-seo' ); ?></strong><br>
+						<code style="font-size: 10px;"><?php echo esc_html( implode( ', ', $active_directives ) ); ?></code>
+					</p>
+				<?php else : ?>
+					<p style="margin: 0; padding: 6px; background: #fff3cd; border-left: 3px solid #ffc107; font-size: 11px; color: #856404;">
+						<?php esc_html_e( 'Override enabled but no directives selected', 'noindex-seo' ); ?>
+					</p>
+				<?php endif; ?>
+			<?php else : ?>
+				<?php if ( ! empty( $global_directives ) ) : ?>
+					<p style="margin: 0; padding: 6px; background: #fff; border-left: 3px solid #9e9e9e; font-size: 11px;">
+						<strong style="color: #666;"><?php esc_html_e( 'Global settings:', 'noindex-seo' ); ?></strong><br>
+						<code style="font-size: 10px;"><?php echo esc_html( implode( ', ', $global_directives ) ); ?></code>
+					</p>
+				<?php else : ?>
+					<p style="margin: 0; padding: 6px; background: #e8f5e9; border-left: 3px solid #4caf50; font-size: 11px; color: #2e7d32;">
+						<?php esc_html_e( 'No restrictions (indexable)', 'noindex-seo' ); ?>
+					</p>
+				<?php endif; ?>
+			<?php endif; ?>
+		</div>
 
 		<script type="text/javascript">
 		(function() {
@@ -1332,6 +1475,112 @@ $post_types_bulk = get_post_types( array( 'public' => true ), 'names' );
 foreach ( $post_types_bulk as $post_type_bulk ) {
 	add_filter( "bulk_actions-edit-{$post_type_bulk}", 'noindex_seo_register_bulk_actions' );
 	add_filter( "handle_bulk_actions-edit-{$post_type_bulk}", 'noindex_seo_handle_bulk_actions', 10, 3 );
+}
+
+/**
+ * Add filter dropdown to post list for robots override status.
+ *
+ * Allows filtering posts by override status: all, with override, without override.
+ *
+ * @since 2.0.0
+ *
+ * @param string $post_type Current post type.
+ * @return void
+ */
+function noindex_seo_add_list_filter( string $post_type ): void {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return;
+	}
+
+	// Get current filter value.
+	$current_filter = isset( $_GET['noindex_seo_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['noindex_seo_filter'] ) ) : '';
+
+	?>
+	<select name="noindex_seo_filter">
+		<option value=""><?php esc_html_e( 'All robots settings', 'noindex-seo' ); ?></option>
+		<option value="with_override" <?php selected( $current_filter, 'with_override' ); ?>>
+			<?php esc_html_e( 'With override', 'noindex-seo' ); ?>
+		</option>
+		<option value="without_override" <?php selected( $current_filter, 'without_override' ); ?>>
+			<?php esc_html_e( 'Without override', 'noindex-seo' ); ?>
+		</option>
+	</select>
+	<?php
+}
+
+/**
+ * Filter posts query by robots override status.
+ *
+ * Modifies the query to show only posts with or without override
+ * based on the selected filter.
+ *
+ * @since 2.0.0
+ *
+ * @param WP_Query $query Current query object.
+ * @return void
+ */
+function noindex_seo_filter_posts_by_override( WP_Query $query ): void {
+	// Only in admin list view.
+	if ( ! is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return;
+	}
+
+	// Check if filter is set.
+	if ( ! isset( $_GET['noindex_seo_filter'] ) || empty( $_GET['noindex_seo_filter'] ) ) {
+		return;
+	}
+
+	$filter = sanitize_text_field( wp_unslash( $_GET['noindex_seo_filter'] ) );
+
+	// Build meta query.
+	$meta_query = array();
+
+	if ( 'with_override' === $filter ) {
+		$meta_query = array(
+			array(
+				'key'     => '_noindex_seo_override',
+				'value'   => '1',
+				'compare' => '=',
+			),
+		);
+	} elseif ( 'without_override' === $filter ) {
+		$meta_query = array(
+			'relation' => 'OR',
+			array(
+				'key'     => '_noindex_seo_override',
+				'value'   => '1',
+				'compare' => '!=',
+			),
+			array(
+				'key'     => '_noindex_seo_override',
+				'compare' => 'NOT EXISTS',
+			),
+		);
+	}
+
+	if ( ! empty( $meta_query ) ) {
+		$query->set( 'meta_query', $meta_query );
+	}
+}
+add_action( 'pre_get_posts', 'noindex_seo_filter_posts_by_override' );
+
+// Register filter dropdown for all public post types.
+$post_types_filter = get_post_types( array( 'public' => true ), 'names' );
+foreach ( $post_types_filter as $post_type_filter ) {
+	add_action( "restrict_manage_posts", function() use ( $post_type_filter ) {
+		global $typenow;
+		if ( $typenow === $post_type_filter ) {
+			noindex_seo_add_list_filter( $post_type_filter );
+		}
+	} );
 }
 
 /**
