@@ -2,7 +2,7 @@
 /**
  * Plugin Name: noindex SEO
  * Plugin URI: https://wordpress.org/plugins/noindex-seo/
- * Description: Allows adding a meta-tag for robots noindex in specific parts of your WordPress site.
+ * Description: Control search engine indexing with robots directives (noindex, nofollow, noarchive, nosnippet, noimageindex) for specific parts of your WordPress site.
  * Requires at least: 6.6
  * Requires PHP: 7.2
  * Version: 2.0.0
@@ -21,10 +21,10 @@ declare(strict_types=1);
 defined( 'ABSPATH' ) || die( 'Bye bye!' );
 
 /**
- * Outputs a 'noindex' directive using the configured implementation method.
+ * Outputs robots directives using the configured implementation method.
  *
- * This function adds a 'noindex' directive to instruct search engines not to index
- * the current page. It supports three implementation methods:
+ * This function adds robots directives (noindex, nofollow, noarchive, nosnippet, noimageindex)
+ * to instruct search engines how to handle the current page. It supports three implementation methods:
  *
  * - 'meta': HTML meta tags via wp_robots filter (default)
  * - 'header': HTTP X-Robots-Tag header
@@ -36,29 +36,42 @@ defined( 'ABSPATH' ) || die( 'Bye bye!' );
  * @since 1.1.0
  * @since 2.0.0 Removed fallback for WordPress < 5.7 (now requires 6.6+).
  * @since 2.0.0 Added support for HTTP X-Robots-Tag headers and multiple implementation methods.
+ * @since 2.0.0 Added support for multiple directives (noindex, nofollow, noarchive, nosnippet, noimageindex).
  *
  * @see https://developer.wordpress.org/reference/hooks/wp_robots/
  * @see https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag
  *
- * @param string $method Implementation method: 'meta', 'header', or 'both'. Default 'meta'.
+ * @param string $method     Implementation method: 'meta', 'header', or 'both'. Default 'meta'.
+ * @param array  $directives Array of directives to apply. Default array('noindex').
  * @return void
  */
-function noindex_seo_metarobots( string $method = 'meta' ): void {
+function noindex_seo_metarobots( string $method = 'meta', array $directives = array( 'noindex' ) ): void {
 	// Sanitize method.
 	$valid_methods = array( 'meta', 'header', 'both' );
 	$method        = in_array( $method, $valid_methods, true ) ? $method : 'meta';
 
+	// Sanitize directives.
+	$valid_directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+	$directives       = array_intersect( $directives, $valid_directives );
+
+	if ( empty( $directives ) ) {
+		return; // No valid directives to apply.
+	}
+
 	// Send HTTP header if requested.
 	if ( in_array( $method, array( 'header', 'both' ), true ) && ! headers_sent() ) {
-		header( 'X-Robots-Tag: noindex', false );
+		$header_value = implode( ', ', $directives );
+		header( 'X-Robots-Tag: ' . $header_value, false );
 	}
 
 	// Add HTML meta tag if requested.
 	if ( in_array( $method, array( 'meta', 'both' ), true ) ) {
 		add_filter(
 			'wp_robots',
-			function ( array $robots ): array {
-				$robots['noindex'] = true;
+			function ( array $robots ) use ( $directives ): array {
+				foreach ( $directives as $directive ) {
+					$robots[ $directive ] = true;
+				}
 				return $robots;
 			}
 		);
@@ -66,18 +79,20 @@ function noindex_seo_metarobots( string $method = 'meta' ): void {
 }
 
 /**
- * Determines whether to output a 'noindex' meta tag based on page context and plugin settings.
+ * Determines whether to output robots directives based on page context and plugin settings.
  *
  * This function checks the current page context (e.g., single post, category archive, 404 page, etc.)
- * and evaluates plugin settings to determine if a 'noindex' directive should be added to the meta robots tag.
+ * and evaluates plugin settings to determine which robots directives (noindex, nofollow, noarchive,
+ * nosnippet, noimageindex) should be added.
  *
  * It retrieves settings efficiently using a transient cache. If the cache is not set, it pulls values
  * from the WordPress options API and rebuilds the cache.
  *
- * The list of contexts and their associated option keys can be filtered via the {@see 'noindex_seo_contexts'} filter.
- * Once a matching context with 'noindex' enabled is found, it calls {@see noindex_seo_metarobots()} to apply the directive.
+ * The list of contexts can be filtered via the {@see 'noindex_seo_contexts'} filter.
+ * Once a matching context is found, it calls {@see noindex_seo_metarobots()} to apply the directives.
  *
  * @since 1.1.0
+ * @since 2.0.0 Added support for multiple directives (noindex, nofollow, noarchive, nosnippet, noimageindex).
  *
  * @global WP_Post $post The global post object, if available.
  *
@@ -135,12 +150,19 @@ function noindex_seo_show(): void {
 	// Try to get the options from the transient.
 	$options = get_transient( 'noindex_seo_options' );
 
+	// Available directives.
+	$available_directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+
 	if ( false === $options || empty( $options ) ) {
 		// Transient not set, retrieve options from the database.
 		$options = array();
 
 		foreach ( $contexts as $context => $option_key ) {
-			$options[ $option_key ] = get_option( $option_key, 0 );
+			// Load all directives for each context.
+			foreach ( $available_directives as $directive ) {
+				$directive_key             = str_replace( 'noindex', $directive, $option_key );
+				$options[ $directive_key ] = get_option( $directive_key, 0 );
+			}
 		}
 
 		// Set the transient for 1 hour to cache the options.
@@ -176,22 +198,122 @@ function noindex_seo_show(): void {
 	// Get implementation method configuration.
 	$implementation_method = get_option( 'noindex_seo_config_method', 'meta' );
 
-	// Iterate through the contexts and apply 'noindex' if the condition and setting are true.
+	// Iterate through the contexts and collect active directives.
 	foreach ( $contexts as $context => $option_key ) {
 
 		if (
 			isset( $current_conditions[ $context ] ) &&
-			$current_conditions[ $context ] &&
-			isset( $options[ $option_key ] ) &&
-			(bool) $options[ $option_key ]
+			$current_conditions[ $context ]
 		) {
-			noindex_seo_metarobots( $implementation_method );
+			// Collect all active directives for this context.
+			$active_directives = array();
 
-			break; // Prevent multiple meta tags from being added.
+			foreach ( $available_directives as $directive ) {
+				$directive_key = str_replace( 'noindex', $directive, $option_key );
+
+				if ( isset( $options[ $directive_key ] ) && (bool) $options[ $directive_key ] ) {
+					$active_directives[] = $directive;
+				}
+			}
+
+			// Apply directives if any are active.
+			if ( ! empty( $active_directives ) ) {
+				noindex_seo_metarobots( $implementation_method, $active_directives );
+				break; // Prevent multiple meta tags from being added.
+			}
 		}
 	}
 
-	unset( $contexts, $options, $current_conditions );
+	unset( $contexts, $options, $current_conditions, $available_directives );
+}
+
+/**
+ * Checks if configuration migration is needed and executes it.
+ *
+ * This function runs on plugin load and checks the configuration version stored in the database.
+ * If the version is less than 2 (or doesn't exist), it migrates old single-directive options
+ * to the new multi-directive system introduced in version 2.0.
+ *
+ * @since 2.0.0
+ *
+ * @return void
+ */
+function noindex_seo_check_migration(): void {
+	$current_config_version = get_option( 'noindex_seo_config_version', 0 );
+
+	// Check if we need to migrate to version 2.
+	if ( $current_config_version < 2 ) {
+		noindex_seo_migrate_to_v2();
+	}
+}
+
+/**
+ * Migrates configuration from version 1.x to version 2.0.
+ *
+ * Version 1.x had single options per context (e.g., noindex_seo_attachment).
+ * Version 2.0 has 5 independent directives per context (e.g., noindex_seo_attachment,
+ * nofollow_seo_attachment, noarchive_seo_attachment, etc.).
+ *
+ * This function:
+ * 1. Reads existing noindex_seo_* options
+ * 2. Preserves their values (they're already in the correct format)
+ * 3. Initializes new directive options (nofollow, noarchive, nosnippet, noimageindex) to 0
+ * 4. Marks migration as complete by setting config version to 2
+ * 5. Clears the transient cache
+ *
+ * @since 2.0.0
+ *
+ * @return void
+ */
+function noindex_seo_migrate_to_v2(): void {
+	$contexts = array(
+		'error',
+		'archive',
+		'attachment',
+		'author',
+		'category',
+		'comment_feed',
+		'customize_preview',
+		'date',
+		'day',
+		'feed',
+		'front_page',
+		'home',
+		'month',
+		'page',
+		'paged',
+		'post_type_archive',
+		'preview',
+		'privacy_policy',
+		'robots',
+		'search',
+		'single',
+		'singular',
+		'tag',
+		'time',
+		'year',
+	);
+
+	$new_directives = array( 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+
+	// For each context, initialize new directives to 0.
+	// The noindex directive already exists and will keep its value.
+	foreach ( $contexts as $context ) {
+		foreach ( $new_directives as $directive ) {
+			$option_key = $directive . '_seo_' . $context;
+
+			// Only set if it doesn't exist (shouldn't exist in v1.x).
+			if ( false === get_option( $option_key ) ) {
+				add_option( $option_key, 0 );
+			}
+		}
+	}
+
+	// Mark migration as complete.
+	update_option( 'noindex_seo_config_version', 2 );
+
+	// Clear transient cache.
+	delete_transient( 'noindex_seo_options' );
 }
 
 add_action( 'template_redirect', 'noindex_seo_show' );
@@ -199,6 +321,7 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'noindex_seo_s
 add_action( 'admin_init', 'noindex_seo_register' );
 add_action( 'admin_menu', 'noindex_seo_menu' );
 add_action( 'admin_enqueue_scripts', 'noindex_seo_enqueue_admin_assets' );
+add_action( 'plugins_loaded', 'noindex_seo_check_migration' );
 
 /**
  * Enqueues admin CSS and JavaScript assets.
@@ -293,23 +416,26 @@ function noindex_seo_menu(): void {
 /**
  * Registers all settings used by the 'noindex SEO' plugin.
  *
- * This function registers individual options for each context in which the plugin
- * may apply a 'noindex' directive (e.g., single posts, category pages, archives, etc.).
- * Each setting is stored as an integer (0 or 1), where 1 indicates that 'noindex' is enabled
+ * This function registers individual options for each context and directive combination.
+ * Each context (e.g., single posts, category pages, archives, etc.) can have multiple
+ * directives (noindex, nofollow, noarchive, nosnippet, noimageindex) applied independently.
+ *
+ * Each setting is stored as an integer (0 or 1), where 1 indicates that the directive is enabled
  * for that context.
  *
  * All settings are grouped under the option group 'noindexseo' and will be handled by the
  * WordPress Settings API when the options form is submitted.
  *
- * Also registers the general configuration option 'noindex_seo_config_seoplugins'.
+ * Also registers the general configuration options.
  * A transient cache is cleared upon update using the {@see 'update_option_noindexseo'} action.
  *
  * @since 1.0.0
+ * @since 2.0.0 Added support for multiple directives per context.
  *
  * @return void
  */
 function noindex_seo_register(): void {
-	$settings = array(
+	$contexts = array(
 		'error',
 		'archive',
 		'attachment',
@@ -337,16 +463,20 @@ function noindex_seo_register(): void {
 		'year',
 	);
 
-	foreach ( $settings as $setting ) {
+	$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
 
-		register_setting(
-			'noindexseo',
-			'noindex_seo_' . $setting,
-			array(
-				'type'    => 'integer',
-				'default' => 0,
-			)
-		);
+	// Register each directive for each context.
+	foreach ( $contexts as $context ) {
+		foreach ( $directives as $directive ) {
+			register_setting(
+				'noindexseo',
+				$directive . '_seo_' . $context,
+				array(
+					'type'    => 'integer',
+					'default' => 0,
+				)
+			);
+		}
 	}
 
 	register_setting(
@@ -464,14 +594,15 @@ add_action( 'admin_init', 'noindex_seo_detect_conflicts' );
  *
  * This function handles the saving of plugin options submitted from the custom admin form.
  * It first verifies the current user's capability and nonce for security. Then it resets all
- * registered context options to `0`, and selectively updates those submitted as checked in the form.
+ * registered options to `0`, and selectively updates those submitted as checked in the form.
  *
- * Additionally, it updates the general configuration setting `noindex_seo_config_seoplugins`,
+ * Additionally, it updates the general configuration settings,
  * clears the plugin's transient cache, and redirects back to the settings page.
  *
  * Hooked to the {@see 'admin_post_update_noindex_seo'} action.
  *
  * @since 1.2.0
+ * @since 2.0.0 Added support for multiple directives (noindex, nofollow, noarchive, nosnippet, noimageindex).
  *
  * @return void
  */
@@ -480,7 +611,7 @@ function noindex_seo_process_form(): void {
 		wp_die( esc_html__( 'Permission denied or invalid nonce.', 'noindex-seo' ) );
 	}
 
-	$settings = array(
+	$contexts = array(
 		'error',
 		'archive',
 		'attachment',
@@ -508,6 +639,8 @@ function noindex_seo_process_form(): void {
 		'year',
 	);
 
+	$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+
 	// Get the implementation method to validate field compatibility.
 	$method_value = isset( $_POST['noindex_seo_config_method'] )
 		? sanitize_text_field( wp_unslash( $_POST['noindex_seo_config_method'] ) )
@@ -517,29 +650,28 @@ function noindex_seo_process_form(): void {
 	$method_value = in_array( $method_value, array( 'meta', 'header', 'both' ), true ) ? $method_value : 'meta';
 
 	// Fields that only work with HTTP headers.
-	$header_only_fields = array( 'attachment', 'feed', 'comment_feed' );
-	$is_header_enabled  = in_array( $method_value, array( 'header', 'both' ), true );
+	$header_only_contexts = array( 'attachment', 'feed', 'comment_feed' );
+	$is_header_enabled    = in_array( $method_value, array( 'header', 'both' ), true );
 
-	// Reset all options to 0..
-	foreach ( $settings as $setting ) {
-		update_option( 'noindex_seo_' . $setting, 0 );
-	}
+	// Reset all options to 0 and process form data.
+	foreach ( $contexts as $context ) {
+		foreach ( $directives as $directive ) {
+			$option_key   = $directive . '_seo_' . $context;
+			$option_value = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
 
-	// Save only active options (checked checkboxes)..
-	foreach ( $settings as $setting ) {
-		$option_key   = 'noindex_seo_' . $setting;
-		$option_value = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
+			// Validate: header-only contexts require header implementation method.
+			if ( in_array( $context, $header_only_contexts, true ) && ! $is_header_enabled ) {
+				// Force to 0 - this context doesn't work with current method.
+				update_option( $option_key, 0 );
+				continue;
+			}
 
-		// Validate: header-only fields require header implementation method.
-		if ( in_array( $setting, $header_only_fields, true ) && ! $is_header_enabled ) {
-			// Force to 0 - this field doesn't work with current method.
-			update_option( $option_key, 0 );
-			continue;
-		}
-
-		// Only set to 1 if the checkbox was actually checked (value should be "1").
-		if ( '1' === $option_value ) {
-			update_option( $option_key, 1 );
+			// Only set to 1 if the checkbox was actually checked (value should be "1").
+			if ( '1' === $option_value ) {
+				update_option( $option_key, 1 );
+			} else {
+				update_option( $option_key, 0 );
+			}
 		}
 	}
 
@@ -801,11 +933,40 @@ function noindex_seo_admin(): void {
 	// Define fields that only work with HTTP headers (non-HTML content).
 	$header_only_fields = array( 'attachment', 'feed', 'comment_feed' );
 	$is_header_enabled  = in_array( $option_config_method, array( 'header', 'both' ), true );
+
+	// Define available directives with config.
+	$directives_config = array(
+		'noindex'      => array(
+			'label' => __( 'noindex', 'noindex-seo' ),
+			'desc'  => __( 'Prevent search engines from indexing this page', 'noindex-seo' ),
+			'icon'  => '🔍',
+		),
+		'nofollow'     => array(
+			'label' => __( 'nofollow', 'noindex-seo' ),
+			'desc'  => __( 'Prevent search engines from following links on this page', 'noindex-seo' ),
+			'icon'  => '🔗',
+		),
+		'noarchive'    => array(
+			'label' => __( 'noarchive', 'noindex-seo' ),
+			'desc'  => __( 'Prevent search engines from showing a cached version', 'noindex-seo' ),
+			'icon'  => '💾',
+		),
+		'nosnippet'    => array(
+			'label' => __( 'nosnippet', 'noindex-seo' ),
+			'desc'  => __( 'Prevent search engines from showing text snippets', 'noindex-seo' ),
+			'icon'  => '📄',
+		),
+		'noimageindex' => array(
+			'label' => __( 'noimageindex', 'noindex-seo' ),
+			'desc'  => __( 'Prevent search engines from indexing images', 'noindex-seo' ),
+			'icon'  => '🖼️',
+		),
+	);
 	?>
 
 	<div class="wrap noindex-seo-admin-wrap">
 		<h1><?php esc_html_e( 'noindex SEO Settings', 'noindex-seo' ); ?></h1>
-		<p><?php esc_html_e( 'Control which pages search engines can index on your WordPress site.', 'noindex-seo' ); ?></p>
+		<p><?php esc_html_e( 'Control how search engines index and display your WordPress content using robots directives.', 'noindex-seo' ); ?></p>
 
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="update_noindex_seo">
@@ -912,50 +1073,43 @@ function noindex_seo_admin(): void {
 								continue;
 							}
 
-							// Get current option value..
-							$option = get_option( 'noindex_seo_' . $field_id, 0 );
-
-							// Prepare badge class..
-							$badge_class = $field['suggestion'] ? 'recommended' : 'not-recommended';
-
 							// Check if field should be disabled (header-only fields with meta method).
 							$should_disable = in_array( $field_id, $header_only_fields, true ) && ! $is_header_enabled;
 							?>
 							<div class="noindex-seo-option<?php echo $should_disable ? ' disabled' : ''; ?>"<?php echo $should_disable ? ' title="' . esc_attr__( 'This option only works with HTTP Headers implementation method', 'noindex-seo' ) . '"' : ''; ?>>
-								<div class="noindex-seo-option-toggle">
-									<label class="noindex-seo-switch">
-										<input
-											type="checkbox"
-											id="noindex_seo_<?php echo esc_attr( $field_id ); ?>"
-											name="noindex_seo_<?php echo esc_attr( $field_id ); ?>"
-											value="1"
-											<?php checked( 1, $option ); ?>
-											<?php disabled( $should_disable ); ?>
-										>
-										<span class="noindex-seo-slider"></span>
-									</label>
-								</div>
-								<div class="noindex-seo-option-content">
-									<div class="noindex-seo-option-label">
-										<label for="noindex_seo_<?php echo esc_attr( $field_id ); ?>">
-											<?php echo esc_html( $field['label'] ); ?>
-										</label>
-										<span class="noindex-seo-badge <?php echo esc_attr( $badge_class ); ?>">
-											<span class="dashicons <?php echo $field['suggestion'] ? 'dashicons-yes' : 'dashicons-no'; ?>"></span>
-											<?php echo $field['suggestion'] ? esc_html__( 'Recommended', 'noindex-seo' ) : esc_html__( 'Not Recommended', 'noindex-seo' ); ?>
-										</span>
+								<div class="noindex-seo-option-header">
+									<div class="noindex-seo-option-title">
+										<strong><?php echo esc_html( $field['label'] ); ?></strong>
+										<?php if ( isset( $field['view_url'] ) && ! empty( $field['view_url'] ) ) : ?>
+											<a href="<?php echo esc_url( $field['view_url'] ); ?>" target="_blank" class="noindex-seo-view-link" title="<?php esc_attr_e( 'View Page', 'noindex-seo' ); ?>">
+												<span class="dashicons dashicons-external"></span>
+											</a>
+										<?php endif; ?>
 									</div>
 									<p class="noindex-seo-option-description">
 										<?php echo esc_html( $field['description'] ); ?>
 									</p>
-									<?php if ( isset( $field['view_url'] ) && ! empty( $field['view_url'] ) ) : ?>
-										<div class="noindex-seo-option-meta">
-											<a href="<?php echo esc_url( $field['view_url'] ); ?>" target="_blank" class="noindex-seo-view-link">
-												<span class="dashicons dashicons-external"></span>
-												<?php esc_html_e( 'View Page', 'noindex-seo' ); ?>
-											</a>
-										</div>
-									<?php endif; ?>
+								</div>
+								<div class="noindex-seo-directives">
+									<?php foreach ( $directives_config as $directive => $config ) : ?>
+										<?php
+										$directive_option_key = $directive . '_seo_' . $field_id;
+										$directive_value      = get_option( $directive_option_key, 0 );
+										?>
+										<label class="noindex-seo-directive-checkbox">
+											<input
+												type="checkbox"
+												id="<?php echo esc_attr( $directive_option_key ); ?>"
+												name="<?php echo esc_attr( $directive_option_key ); ?>"
+												value="1"
+												<?php checked( 1, $directive_value ); ?>
+												<?php disabled( $should_disable ); ?>
+											>
+											<span class="directive-icon"><?php echo esc_html( $config['icon'] ); ?></span>
+											<span class="directive-label"><?php echo esc_html( $config['label'] ); ?></span>
+											<span class="directive-description"><?php echo esc_html( $config['desc'] ); ?></span>
+										</label>
+									<?php endforeach; ?>
 								</div>
 							</div>
 						<?php endforeach; ?>

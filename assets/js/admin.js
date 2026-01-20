@@ -17,7 +17,6 @@
 		initCollapsibleCards();
 		initSearch();
 		initStats();
-		initFormSubmit();
 		initTooltips();
 		initMethodDependentFields();
 	}
@@ -95,8 +94,11 @@
 
 				$( '.noindex-seo-option' ).each(
 					function () {
-						const optionText = $( this ).text().toLowerCase();
-						const isMatch    = optionText.indexOf( searchTerm ) > -1;
+						const optionTitle       = $( this ).find( '.noindex-seo-option-title' ).text().toLowerCase();
+						const optionDescription = $( this ).find( '.noindex-seo-option-description' ).text().toLowerCase();
+						const directivesText    = $( this ).find( '.noindex-seo-directives' ).text().toLowerCase();
+						const combinedText      = optionTitle + ' ' + optionDescription + ' ' + directivesText;
+						const isMatch           = combinedText.indexOf( searchTerm ) > -1;
 
 						$( this ).toggle( isMatch );
 					}
@@ -132,13 +134,13 @@
 	 * Update statistics display
 	 */
 	function updateStats() {
-		const totalOptions       = $( 'input[name^="noindex_seo_"]' ).not( '[name="noindex_seo_config_seoplugins"]' ).length;
-		const enabledOptions     = $( 'input[name^="noindex_seo_"]:checked' ).not( '[name="noindex_seo_config_seoplugins"]' ).length;
-		const recommendedOptions = $( '.noindex-seo-badge.recommended' ).length;
+		const totalContexts   = $( '.noindex-seo-option' ).not( '.disabled' ).length;
+		const enabledCount    = $( '.noindex-seo-directive-checkbox input[type="checkbox"]:checked' ).not( ':disabled' ).length;
+		const totalDirectives = $( '.noindex-seo-directive-checkbox input[type="checkbox"]' ).not( ':disabled' ).length;
 
-		$( '#noindex-seo-stat-total' ).text( totalOptions );
-		$( '#noindex-seo-stat-enabled' ).text( enabledOptions );
-		$( '#noindex-seo-stat-recommended' ).text( recommendedOptions );
+		$( '#noindex-seo-stat-total' ).text( totalDirectives );
+		$( '#noindex-seo-stat-enabled' ).text( enabledCount );
+		$( '#noindex-seo-stat-recommended' ).text( totalContexts );
 	}
 
 	/**
@@ -181,27 +183,28 @@
 			const method          = methodSelect.val();
 			const isHeaderEnabled = (method === 'header' || method === 'both');
 
-			// Fields that ONLY work with HTTP headers (non-HTML content).
-			const headerOnlyFields = [
+			// Contexts that ONLY work with HTTP headers (non-HTML content).
+			const headerOnlyContexts = [
 				'attachment',    // Attachment pages (may contain PDFs, images, etc.).
 				'feed',          // RSS/Atom feeds (XML, not HTML).
 				'comment_feed'   // Comment feeds (XML, not HTML).
 			];
 
-			headerOnlyFields.forEach(
-				function (field) {
-					const checkbox = $( '#noindex_seo_' + field );
-					const option   = checkbox.closest( '.noindex-seo-option' );
+			headerOnlyContexts.forEach(
+				function (context) {
+					// Find all directive checkboxes for this context.
+					const directiveCheckboxes = $( 'input[name$="_seo_' + context + '"]' );
+					const option              = directiveCheckboxes.first().closest( '.noindex-seo-option' );
 
 					if ( ! isHeaderEnabled) {
-						// Disable field and uncheck it.
-						checkbox.prop( 'disabled', true );
-						checkbox.prop( 'checked', false );
+						// Disable all directives for this context.
+						directiveCheckboxes.prop( 'disabled', true );
+						directiveCheckboxes.prop( 'checked', false );
 						option.addClass( 'disabled' );
 						option.attr( 'title', 'This option only works with HTTP Headers implementation method' );
 					} else {
-						// Enable field.
-						checkbox.prop( 'disabled', false );
+						// Enable all directives for this context.
+						directiveCheckboxes.prop( 'disabled', false );
 						option.removeClass( 'disabled' );
 						option.removeAttr( 'title' );
 					}

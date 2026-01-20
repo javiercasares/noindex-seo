@@ -139,14 +139,16 @@
 	Option Items
 	=========================== */
 .noindex-seo-option {
-	display: flex;
-	align-items: flex-start;
-	gap: 16px;
-	padding: 16px;
+	padding: 24px;
 	background: #f9fafb;
-	border-radius: 6px;
+	border-radius: 8px;
 	border: 1px solid #e5e7eb;
 	transition: all 0.2s ease;
+	margin-bottom: 20px;
+}
+
+.noindex-seo-option:last-child {
+	margin-bottom: 0;
 }
 
 .noindex-seo-option:hover {
@@ -155,23 +157,23 @@
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.noindex-seo-option-toggle {
-	flex-shrink: 0;
+.noindex-seo-option-header {
+	margin-bottom: 18px;
+	padding-bottom: 14px;
+	border-bottom: 1px solid #e5e7eb;
 }
 
-.noindex-seo-option-content {
-	flex: 1;
-	min-width: 0;
-}
-
-.noindex-seo-option-label {
+.noindex-seo-option-title {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 6px;
-	font-weight: 500;
+	font-size: 15px;
 	color: #111827;
-	font-size: 14px;
+}
+
+.noindex-seo-option-title strong {
+	font-weight: 600;
 }
 
 .noindex-seo-option-description {
@@ -181,11 +183,101 @@
 	margin: 0;
 }
 
-.noindex-seo-option-meta {
+.noindex-seo-view-link {
+	color: #667eea;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 13px;
+	transition: color 0.2s ease;
+}
+
+.noindex-seo-view-link:hover {
+	color: #5568d3;
+}
+
+.noindex-seo-view-link .dashicons {
+	width: 14px;
+	height: 14px;
+	font-size: 14px;
+}
+
+/* ===========================
+	Directives Checkboxes
+	=========================== */
+.noindex-seo-directives {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+.noindex-seo-directive-checkbox {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	margin-top: 8px;
+	gap: 10px;
+	padding: 10px 14px;
+	background: #fff;
+	border: 2px solid #e5e7eb;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	user-select: none;
+	font-size: 13px;
+	font-weight: 500;
+	color: #374151;
+}
+
+.noindex-seo-directive-checkbox:hover {
+	border-color: #d1d5db;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.noindex-seo-directive-checkbox input[type="checkbox"] {
+	margin: 0;
+	width: 18px;
+	height: 18px;
+	cursor: pointer;
+	accent-color: #667eea;
+	flex-shrink: 0;
+}
+
+.noindex-seo-directive-checkbox input[type="checkbox"]:checked {
+	background-color: #667eea;
+}
+
+.noindex-seo-directive-checkbox:has(input:checked) {
+	border-color: #667eea;
+	background-color: #eff6ff;
+}
+
+.noindex-seo-directive-checkbox:has(input:checked) .directive-label {
+	color: #667eea;
+	font-weight: 600;
+}
+
+.directive-icon {
+	font-size: 18px;
+	line-height: 1;
+	flex-shrink: 0;
+	width: 24px;
+	text-align: center;
+}
+
+.directive-label {
+	font-family: 'Courier New', monospace;
+	font-size: 13px;
+	flex: 1;
+	min-width: 100px;
+}
+
+.directive-description {
+	color: #6b7280;
+	font-size: 12px;
+	font-weight: 400;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	flex: 2;
 }
 
 /* ===========================
@@ -542,9 +634,10 @@ input:checked + .noindex-seo-slider:before {
 	Disabled Fields
 	=========================== */
 .noindex-seo-option.disabled {
-	opacity: 0.5;
+	opacity: 0.6;
 	cursor: not-allowed;
 	position: relative;
+	background: #f9fafb;
 }
 
 .noindex-seo-option.disabled::before {
@@ -557,25 +650,43 @@ input:checked + .noindex-seo-slider:before {
 	z-index: 1;
 }
 
-.noindex-seo-option.disabled .noindex-seo-switch {
+.noindex-seo-option.disabled .noindex-seo-directive-checkbox {
 	pointer-events: none;
+	opacity: 0.5;
 }
 
-.noindex-seo-option.disabled .noindex-seo-option-label label {
+.noindex-seo-option.disabled .noindex-seo-option-title {
 	color: #9ca3af;
-	cursor: not-allowed;
 }
 
 .noindex-seo-option.disabled .noindex-seo-option-description {
 	color: #d1d5db;
 }
 
-.noindex-seo-option.disabled .noindex-seo-slider {
-	background-color: #e5e7eb;
-}
+/* ===========================
+	Responsive Design
+	=========================== */
+@media screen and (max-width: 782px) {
+	.noindex-seo-directive-checkbox {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
 
-.noindex-seo-option.disabled input:checked + .noindex-seo-slider {
-	background-color: #d1d5db;
+	.directive-description {
+		flex-basis: 100%;
+		margin-left: 52px;
+		margin-top: 4px;
+		font-size: 11px;
+	}
+
+	.noindex-seo-option {
+		padding: 16px;
+	}
+
+	.noindex-seo-option-header {
+		margin-bottom: 14px;
+		padding-bottom: 10px;
+	}
 }
 
 /* ===========================

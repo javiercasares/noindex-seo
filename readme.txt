@@ -1,6 +1,6 @@
 === noindex SEO ===
 Contributors: javiercasares
-Tags: seo, noindex
+Tags: seo, noindex, nofollow, noarchive, robots
 Requires at least: 6.6
 Tested up to: 6.9
 Stable tag: 2.0.0
@@ -9,11 +9,19 @@ Version: 2.0.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
-Allows to add noindex directives for robots in some parts of your WordPress site using HTML meta tags or HTTP headers.
+Control search engine behavior with 5 independent robots directives (noindex, nofollow, noarchive, nosnippet, noimageindex) using HTML meta tags or HTTP headers.
 
 == Description ==
 
-Control search engine indexing with flexible implementation methods. Choose between HTML meta tags, HTTP X-Robots-Tag headers, or both for maximum compatibility.
+Fine-grained control over how search engines index and display your WordPress content. Apply 5 independent robots directives to 25 different page contexts with flexible implementation methods.
+
+**5 Robots Directives:**
+
+* **noindex**: Prevent search engines from indexing the page
+* **nofollow**: Prevent search engines from following links on the page
+* **noarchive**: Prevent search engines from showing cached versions
+* **nosnippet**: Prevent search engines from showing text snippets in results
+* **noimageindex**: Prevent search engines from indexing images on the page
 
 **Implementation Methods:**
 
@@ -23,11 +31,12 @@ Control search engine indexing with flexible implementation methods. Choose betw
 
 **Perfect for:**
 
-* Blocking indexing of attachment pages
-* Preventing duplicate content issues
-* Controlling archive page indexing
-* Managing pagination SEO
-* Protecting private or draft content from search engines
+* Blocking indexing of attachment pages while allowing link following
+* Preventing duplicate content issues with flexible directive combinations
+* Controlling archive page indexing with granular control
+* Managing pagination SEO with independent settings
+* Protecting private content from search engine caching
+* Preventing snippet display while still indexing content
 
 **Main pages**
 
@@ -102,44 +111,58 @@ Extract the contents of the ZIP and upload the contents to the `/wp-content/plug
 
 = 2.0.0 [2026-01-20] =
 
-**Security Hardening Release**
+**Major Feature & Security Release**
 
-This is a major security hardening release based on a comprehensive security audit. All vulnerabilities identified have been addressed.
+This is a major release with comprehensive security hardening and powerful new robots directive features.
 
-**Security Improvements**
+**🆕 New Features**
 
-* Added explicit capability checks in admin functions for defense in depth (fixes CWE-862)
-* Enhanced input sanitization in form processing with proper validation (addresses CWE-20)
-* Improved HTML attribute escaping throughout admin interface (prevents CWE-79)
+* **5 Independent Robots Directives**: noindex, nofollow, noarchive, nosnippet, noimageindex
+* Each directive can be enabled independently for any page context
+* 125 total configurable options (25 contexts × 5 directives)
+* Checkbox-based interface with emoji icons for easy visualization
+* Tooltip descriptions for each directive
+* Multiple directives combined in single meta tag or HTTP header
+
+**🔒 Security Improvements**
+
+* Added explicit capability checks in admin functions (fixes CWE-862)
+* Enhanced input sanitization with proper validation (addresses CWE-20)
+* Improved HTML attribute escaping (prevents CWE-79)
 * Added validation for filtered contexts to prevent option key injection
 * Strengthened transient cache clearing with admin context verification
-* Updated documentation with @since tags for security improvements
+* Modernized code for PHP 7.2+ with strict types and type declarations
 
-**Technical Changes**
+**🎨 UI/UX Improvements**
 
-* Admin function now verifies `manage_options` capability before rendering
-* Form inputs are now sanitized using `sanitize_text_field()` and `wp_unslash()`
-* Configuration values properly validated with `absint()` and range checking
-* Dashicon attributes now properly escaped with `esc_attr()` and `esc_attr__()`
-* Context filters validated to ensure option keys follow expected pattern
-* Transient clearing now checks for admin or AJAX context before execution
+* Replaced single toggle switches with 5 directive checkboxes per context
+* Compact inline layout with visual directive indicators
+* Updated statistics dashboard to track directive usage
+* Enhanced search functionality for directive names
+* Maintained modern card-based collapsible design
 
-**Compatibility**
+**⚙️ Technical Changes**
 
-* WordPress: 4.1 - 6.8
-* PHP: 5.6 - 8.4
-* No breaking changes - fully backward compatible
+* `noindex_seo_metarobots()` now accepts array of directives
+* All functions updated to handle multiple directives per context
+* Enhanced Settings API registration for all directive combinations
+* Form processing handles 125 options with validation
+* Uninstall script cleans up all directive options
+* HTTP headers support multiple directives (e.g., `X-Robots-Tag: noindex, nofollow, noarchive`)
 
-**Documentation**
+**🔧 Compatibility & Migration**
 
-* Complete security audit documentation in `docs/SECURITY-2026-01-20.md`
-* Security patches documentation in `docs/SECURITY-PATCHES-2026-01-20.md`
-* Automated security testing script in `docs/security-tests.sh`
-* Updated CLAUDE.md with architecture and security information
+* WordPress: 6.6 - 6.9 (updated from 4.1+)
+* PHP: 7.2 - 8.5 (updated from 5.6+)
+* **Automatic Migration**: Existing noindex settings preserved and migrated automatically
+* **No Manual Action Required**: Plugin detects version and migrates configuration on first load
+* **Configuration Version Tracking**: Uses version number to ensure migration runs only once
+* New directives (nofollow, noarchive, nosnippet, noimageindex) default to disabled
+* Migration is safe and can run multiple times without data loss
 
 **Upgrade Notice**
 
-This is a security hardening release. While no critical vulnerabilities were exploited in the wild, these improvements add important additional layers of protection following WordPress security best practices. Upgrade recommended for all users.
+Major feature release with 5 independent robots directives. **Fully backward compatible** - your existing noindex settings will be automatically migrated on upgrade. No manual action required. Recommended for all users.
 
 = 1.2.0 [2025-04-08] =
 

@@ -15,12 +15,30 @@ This is a major release that includes comprehensive security hardening and a new
 
 ### Added
 
+#### Multiple Robots Directives Support
+- **5 Independent Directives per Context**
+  - `noindex`: Prevent search engines from indexing
+  - `nofollow`: Prevent search engines from following links
+  - `noarchive`: Prevent cached versions in search results
+  - `nosnippet`: Prevent text snippets in search results
+  - `noimageindex`: Prevent image indexing
+  - Each directive can be enabled independently for maximum flexibility
+  - Total: 125 configurable options (25 contexts × 5 directives)
+
+- **Improved User Interface**
+  - Checkbox-based directive selection with emoji icons
+  - Inline compact layout showing all 5 directives per context
+  - Tooltips explaining each directive's purpose
+  - Visual feedback when directives are enabled
+  - Maintained modern card-based design
+
 #### Flexible Implementation Methods
 - **HTTP X-Robots-Tag Headers Support**
-  - New option to send noindex directives via HTTP headers
+  - New option to send robots directives via HTTP headers
   - Works with all content types (HTML, PDFs, images, feeds, attachments)
   - More robust and efficient than HTML meta tags
   - Ideal for WordPress attachments and non-HTML content
+  - Supports multiple directives in single header (e.g., `X-Robots-Tag: noindex, nofollow, noarchive`)
 
 - **Implementation Method Selection**
   - Three implementation options:
@@ -30,12 +48,15 @@ This is a major release that includes comprehensive security hardening and a new
   - User-configurable in General Configuration section
   - Default is HTML meta tags for backward compatibility
   - Automatic sanitization and validation of method selection
+  - Context-specific validation (attachment, feed, comment_feed require headers)
 
 - **Enhanced `noindex_seo_metarobots()` Function**
-  - Now accepts `$method` parameter to control implementation
+  - Now accepts `$directives` array parameter with multiple directives
+  - Accepts `$method` parameter to control implementation
   - Supports 'meta', 'header', or 'both' methods
   - Checks `headers_sent()` before sending HTTP headers
-  - Updated PHPDoc with detailed method documentation
+  - Validates and sanitizes all directives
+  - Updated PHPDoc with detailed documentation
 
 ### Security
 
@@ -142,27 +163,49 @@ This is a major release that includes comprehensive security hardening and a new
 ### Technical Details
 
 #### Changed Functions
-1. **`noindex_seo_admin()`**
-   - **COMPLETELY REWRITTEN** with modern UI/UX design
-   - Added capability verification at function entry
-   - Returns proper HTTP 403 response on unauthorized access
-   - Changed from table layout to card-based layout
-   - Replaced standard checkboxes with toggle switches
-   - Added section icons and visual badges
-   - Implemented statistics dashboard
-   - Added search box and collapsible sections
-   - Enhanced accessibility with ARIA labels
+1. **`noindex_seo_metarobots()`**
+   - **MAJOR UPDATE** to support multiple directives
+   - Now accepts `$directives` array parameter (default: `array('noindex')`)
+   - Validates and sanitizes all directive values
+   - Generates combined HTTP headers (e.g., `X-Robots-Tag: noindex, nofollow`)
+   - Applies multiple directives to `wp_robots` filter
+   - Backward compatible with single directive usage
 
-2. **`noindex_seo_process_form()`**
-   - Enhanced input sanitization for all POST data
-   - Added strict value validation for checkboxes
-   - Improved configuration option handling
-
-3. **`noindex_seo_show()`**
+2. **`noindex_seo_show()`**
+   - **UPDATED** to collect all active directives per context
+   - Loops through all 5 directives for each context
+   - Builds directive array before calling `noindex_seo_metarobots()`
+   - Enhanced transient caching to include all directives
    - Added context filter validation
    - Prevents injection of arbitrary option keys
 
-4. **`noindex_seo_clear_transient()`**
+3. **`noindex_seo_register()`**
+   - **UPDATED** to register 125 options (25 contexts × 5 directives)
+   - Nested loop structure for contexts and directives
+   - Each directive+context combination gets individual option
+   - Maintains Settings API compliance
+
+4. **`noindex_seo_process_form()`**
+   - **UPDATED** to process all directive checkboxes
+   - Handles 125 options instead of 25
+   - Enhanced input sanitization for all POST data
+   - Added strict value validation for checkboxes
+   - Context-specific validation for header-only fields
+   - Improved configuration option handling
+
+5. **`noindex_seo_admin()`**
+   - **COMPLETELY REWRITTEN** with multi-directive UI
+   - Changed from single toggle to 5 checkboxes per option
+   - Added directive configuration array with icons and descriptions
+   - Checkbox-based interface with emoji icons
+   - Maintained card-based layout and collapsible sections
+   - Added capability verification at function entry
+   - Returns proper HTTP 403 response on unauthorized access
+   - Implemented statistics dashboard
+   - Added search box functionality
+   - Enhanced accessibility with ARIA labels and tooltips
+
+6. **`noindex_seo_clear_transient()`**
    - Added admin/AJAX context verification
    - Updated docblock with security notes
 
@@ -171,19 +214,38 @@ This is a major release that includes comprehensive security hardening and a new
    - Applied proper escaping to all dynamic attributes
 
 #### Added Functions
-1. **`noindex_seo_enqueue_admin_assets()`**
+1. **`noindex_seo_check_migration()`**
+   - Checks configuration version on plugin load
+   - Triggers migration if version < 2
+   - Registered on `plugins_loaded` hook
+   - Runs once per installation after upgrade
+
+2. **`noindex_seo_migrate_to_v2()`**
+   - Migrates v1.x configuration to v2.0
+   - Preserves existing `noindex_seo_*` options
+   - Initializes new directive options (nofollow, noarchive, nosnippet, noimageindex)
+   - Sets configuration version to 2
+   - Clears transient cache after migration
+   - Safe to run multiple times (idempotent)
+
+3. **`noindex_seo_enqueue_admin_assets()`**
    - New function to conditionally load CSS and JavaScript assets
    - Only loads on the plugin's settings page for performance
    - Includes script localization for translations
    - Registered on `admin_enqueue_scripts` hook
 
-### Compatibility
+### Compatibility & Migration
 
 - **WordPress:** 6.6 - 6.9 (updated from 4.1 - 6.8)
 - **PHP:** 7.2 - 8.5 (updated from 5.6 - 8.4)
 - **Backward Compatibility:** 100% - No breaking changes
-- **Database Schema:** No changes
-- **Settings:** No changes (all existing settings preserved)
+- **Database Schema:** Extended (not replaced)
+- **Settings Migration:** Automatic on plugin load
+  - Existing `noindex_seo_*` options preserved with same values
+  - New directive options (`nofollow`, `noarchive`, `nosnippet`, `noimageindex`) initialized to 0 (disabled)
+  - Configuration version tracking (`noindex_seo_config_version = 2`)
+  - Migration runs once automatically on first load after upgrade
+  - No manual intervention required
 
 ### Removed
 

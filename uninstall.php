@@ -8,6 +8,7 @@
  * @package noindex-seo
  * @since 1.0.0
  * @since 2.0.0 Added cleanup for new implementation method option and transients.
+ * @since 2.0.0 Added cleanup for multiple directives (noindex, nofollow, noarchive, nosnippet, noimageindex).
  */
 
 declare(strict_types=1);
@@ -17,42 +18,47 @@ if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-// Delete all noindex context options.
-$context_options = array(
-	'noindex_seo_archive',
-	'noindex_seo_attachment',
-	'noindex_seo_author',
-	'noindex_seo_category',
-	'noindex_seo_comment_feed',
-	'noindex_seo_customize_preview',
-	'noindex_seo_date',
-	'noindex_seo_day',
-	'noindex_seo_error',
-	'noindex_seo_feed',
-	'noindex_seo_front_page',
-	'noindex_seo_home',
-	'noindex_seo_month',
-	'noindex_seo_page',
-	'noindex_seo_paged',
-	'noindex_seo_post_type_archive',
-	'noindex_seo_preview',
-	'noindex_seo_privacy_policy',
-	'noindex_seo_robots',
-	'noindex_seo_search',
-	'noindex_seo_single',
-	'noindex_seo_singular',
-	'noindex_seo_tag',
-	'noindex_seo_time',
-	'noindex_seo_year',
+// Define contexts and directives.
+$contexts   = array(
+	'error',
+	'archive',
+	'attachment',
+	'author',
+	'category',
+	'comment_feed',
+	'customize_preview',
+	'date',
+	'day',
+	'feed',
+	'front_page',
+	'home',
+	'month',
+	'page',
+	'paged',
+	'post_type_archive',
+	'preview',
+	'privacy_policy',
+	'robots',
+	'search',
+	'single',
+	'singular',
+	'tag',
+	'time',
+	'year',
 );
+$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
 
-foreach ( $context_options as $option ) {
-	delete_option( $option );
+// Delete all directive options for each context.
+foreach ( $contexts as $context ) {
+	foreach ( $directives as $directive ) {
+		delete_option( $directive . '_seo_' . $context );
+	}
 }
 
 // Delete configuration options.
 delete_option( 'noindex_seo_config_seoplugins' );
 delete_option( 'noindex_seo_config_method' );
+delete_option( 'noindex_seo_config_version' );
 
 // Delete transient cache.
 delete_transient( 'noindex_seo_options' );
@@ -64,7 +70,12 @@ global $wpdb;
 // Direct database queries are necessary here for complete cleanup during uninstall.
 // This is a DELETE operation (not SELECT), so caching is not applicable.
 // Using wildcards with delete_option() is not possible, requiring direct SQL.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'noindex_seo_%'" );
+// Clean up all directive-related options (noindex, nofollow, noarchive, nosnippet, noimageindex).
+foreach ( $directives as $directive ) {
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $directive . '_seo_%' ) );
+}
+
+// Clean up transients.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_noindex_seo_%'" );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_noindex_seo_%'" );
 // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
