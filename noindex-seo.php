@@ -5,7 +5,7 @@
  * Description: Allows adding a meta-tag for robots noindex in specific parts of your WordPress site.
  * Requires at least: 4.1
  * Requires PHP: 5.6
- * Version: 1.2.0
+ * Version: 2.0.0
  * Author: Javier Casares
  * Author URI: https://www.javiercasares.com/
  * License: GPL-2.0-or-later
@@ -102,6 +102,19 @@ function noindex_seo_show() {
 			'time'              => 'noindex_seo_time',
 		)
 	);
+
+	// Validate filtered contexts to prevent injection of invalid option names.
+	if ( is_array( $contexts ) ) {
+		foreach ( $contexts as $context => $option_key ) {
+			// Ensure option_key follows expected pattern.
+			if ( ! is_string( $option_key ) || 0 !== strpos( $option_key, 'noindex_seo_' ) ) {
+				unset( $contexts[ $context ] );
+			}
+		}
+	} else {
+		// If contexts is not an array after filtering, reset to defaults.
+		$contexts = array();
+	}
 
 	// Try to get the options from the transient.
 	$options = get_transient( 'noindex_seo_options' );
@@ -279,7 +292,8 @@ function noindex_seo_register() {
 	);
 
 	// Hook to settings update to clear transient cache.
-	add_action( 'update_option_noindexseo', 'noindex_seo_clear_transient', 10, 2 );
+	// Note: Hook receives $old_value and $value parameters but we don't need them.
+	add_action( 'update_option_noindexseo', 'noindex_seo_clear_transient', 10, 0 );
 }
 
 /**
@@ -292,10 +306,17 @@ function noindex_seo_register() {
  * Hooked to the {@see 'update_option_noindexseo'} action.
  *
  * @since 1.0.0
+ * @since 2.0.0 Added admin context verification for security.
  *
  * @return void
  */
 function noindex_seo_clear_transient() {
+	// Verify we're in a valid admin context.
+	if ( ! is_admin() && ! wp_doing_ajax() ) {
+		return;
+	}
+
+	// Delete the transient cache.
 	delete_transient( 'noindex_seo_options' );
 }
 
@@ -415,16 +436,24 @@ function noindex_seo_process_form() {
 
 	// Save only active options (checked checkboxes).
 	foreach ( $settings as $setting ) {
-		if ( isset( $_POST[ 'noindex_seo_' . $setting ] ) ) {
-			update_option( 'noindex_seo_' . $setting, 1 );
+		$option_key   = 'noindex_seo_' . $setting;
+		$option_value = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
+
+		// Only set to 1 if the checkbox was actually checked (value should be "1").
+		if ( '1' === $option_value ) {
+			update_option( $option_key, 1 );
 		}
 	}
 
 	// Save general configuration option.
-	update_option(
-		'noindex_seo_config_seoplugins',
-		isset( $_POST['noindex_seo_config_seoplugins'] ) ? 1 : 0
-	);
+	$config_value = isset( $_POST['noindex_seo_config_seoplugins'] )
+		? absint( $_POST['noindex_seo_config_seoplugins'] )
+		: 0;
+
+	// Ensure value is either 0 or 1.
+	$config_value = ( 1 === $config_value ) ? 1 : 0;
+
+	update_option( 'noindex_seo_config_seoplugins', $config_value );
 
 	// Clear cache.
 	delete_transient( 'noindex_seo_options' );
@@ -452,6 +481,15 @@ add_action( 'admin_post_update_noindex_seo', 'noindex_seo_process_form' );
  * @return void
  */
 function noindex_seo_admin() {
+	// Verify user capabilities for defense in depth.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die(
+			esc_html__( 'You do not have sufficient permissions to access this page.', 'noindex-seo' ),
+			esc_html__( 'Permission Denied', 'noindex-seo' ),
+			array( 'response' => 403 )
+		);
+	}
+
 	// Define sections and their respective settings.
 	$sections = array(
 		'main_pages'  => array(
@@ -683,7 +721,11 @@ function noindex_seo_admin() {
 					echo '<th scope="row"><label for="noindex_seo_' . esc_attr( $field_id ) . '">' . esc_html( $field['label'] ) . '</label></th>';
 					echo '<td><fieldset>';
 					echo '<input type="checkbox" id="noindex_seo_' . esc_attr( $field_id ) . '" name="noindex_seo_' . esc_attr( $field_id ) . '" value="1" ' . checked( 1, $option, false ) . '> ';
-					echo esc_html( $field['recommended'] ) . ': <span class="dashicons ' . ( $field['suggestion'] ? 'dashicons-yes' : 'dashicons-no' ) . '" title="' . ( $field['suggestion'] ? 'Yes' : 'No' ) . '"></span>. ';
+					// Prepare dashicon attributes for security.
+				$dashicon_class = $field['suggestion'] ? 'dashicons-yes' : 'dashicons-no';
+				$dashicon_title = $field['suggestion'] ? esc_attr__( 'Yes', 'noindex-seo' ) : esc_attr__( 'No', 'noindex-seo' );
+
+				echo esc_html( $field['recommended'] ) . ': <span class="dashicons ' . esc_attr( $dashicon_class ) . '" title="' . $dashicon_title . '"></span>. ';
 
 					echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
 

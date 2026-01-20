@@ -3,9 +3,9 @@ Contributors: javiercasares
 Tags: seo, noindex
 Requires at least: 4.1
 Tested up to: 6.8
-Stable tag: 1.2.0
+Stable tag: 2.0.0
 Requires PHP: 5.6
-Version: 1.2.0
+Version: 2.0.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
@@ -86,6 +86,47 @@ Extract the contents of the ZIP and upload the contents to the `/wp-content/plug
 
 == Changelog ==
 
+= 2.0.0 [2026-01-20] =
+
+**Security Hardening Release**
+
+This is a major security hardening release based on a comprehensive security audit. All vulnerabilities identified have been addressed.
+
+**Security Improvements**
+
+* Added explicit capability checks in admin functions for defense in depth (fixes CWE-862)
+* Enhanced input sanitization in form processing with proper validation (addresses CWE-20)
+* Improved HTML attribute escaping throughout admin interface (prevents CWE-79)
+* Added validation for filtered contexts to prevent option key injection
+* Strengthened transient cache clearing with admin context verification
+* Updated documentation with @since tags for security improvements
+
+**Technical Changes**
+
+* Admin function now verifies `manage_options` capability before rendering
+* Form inputs are now sanitized using `sanitize_text_field()` and `wp_unslash()`
+* Configuration values properly validated with `absint()` and range checking
+* Dashicon attributes now properly escaped with `esc_attr()` and `esc_attr__()`
+* Context filters validated to ensure option keys follow expected pattern
+* Transient clearing now checks for admin or AJAX context before execution
+
+**Compatibility**
+
+* WordPress: 4.1 - 6.8
+* PHP: 5.6 - 8.4
+* No breaking changes - fully backward compatible
+
+**Documentation**
+
+* Complete security audit documentation in `docs/SECURITY-2026-01-20.md`
+* Security patches documentation in `docs/SECURITY-PATCHES-2026-01-20.md`
+* Automated security testing script in `docs/security-tests.sh`
+* Updated CLAUDE.md with architecture and security information
+
+**Upgrade Notice**
+
+This is a security hardening release. While no critical vulnerabilities were exploited in the wild, these improvements add important additional layers of protection following WordPress security best practices. Upgrade recommended for all users.
+
 = 1.2.0 [2025-04-08] =
 
 **Changes**
@@ -158,6 +199,7 @@ This plugin adheres to the following security measures and review protocols for 
 
 == Vulnerabilities ==
 
-* No vulnerabilities have been published up to version 1.2.0.
+* No vulnerabilities have been published up to version 2.0.0.
+* Version 2.0.0 includes proactive security hardening based on comprehensive security audit (see docs/SECURITY-2026-01-20.md).
 
 Found a security vulnerability? Please report it to us privately at the [noindex SEO GitHub repository](https://github.com/javiercasares/noindex-seo/security/advisories/new).
