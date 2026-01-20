@@ -576,41 +576,6 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-	Loading State
-	=========================== */
-.noindex-seo-loading {
-	opacity: 0.6;
-	pointer-events: none;
-}
-
-/* Loading state for WordPress default submit button */
-#submit.loading {
-	position: relative;
-	color: transparent !important;
-}
-
-#submit.loading::after {
-	content: "";
-	position: absolute;
-	width: 16px;
-	height: 16px;
-	top: 50%;
-	left: 50%;
-	margin-left: -8px;
-	margin-top: -8px;
-	border: 2px solid #ffffff;
-	border-radius: 50%;
-	border-top-color: transparent;
-	animation: spinner 0.6s linear infinite;
-}
-
-@keyframes spinner {
-	to {
-		transform: rotate(360deg);
-	}
-}
-
-/* ===========================
 	Tooltips
 	=========================== */
 .noindex-seo-tooltip {

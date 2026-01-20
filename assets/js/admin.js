@@ -144,20 +144,6 @@
 	}
 
 	/**
-	 * Handle form submission with loading state
-	 */
-	function initFormSubmit() {
-		$( 'form' ).on(
-			'submit',
-			function () {
-				const submitButton = $( '#submit' );
-				submitButton.addClass( 'loading' );
-				submitButton.prop( 'disabled', true );
-			}
-		);
-	}
-
-	/**
 	 * Initialize tooltips (using native browser tooltips for now)
 	 */
 	function initTooltips() {
