@@ -5,8 +5,8 @@
  */
 
 /* ===========================
-   Container & Layout
-   =========================== */
+	Container & Layout
+	=========================== */
 .noindex-seo-admin-wrap {
 	max-width: 1200px;
 	margin: 20px 0;
@@ -15,8 +15,8 @@
 /* Header styles removed - using WordPress default styles */
 
 /* ===========================
-   Tabs Navigation
-   =========================== */
+	Tabs Navigation
+	=========================== */
 .noindex-seo-tabs {
 	display: flex;
 	gap: 10px;
@@ -49,8 +49,8 @@
 }
 
 /* ===========================
-   Tab Content
-   =========================== */
+	Tab Content
+	=========================== */
 .noindex-seo-tab-content {
 	display: none;
 }
@@ -72,8 +72,8 @@
 }
 
 /* ===========================
-   Cards / Sections
-   =========================== */
+	Cards / Sections
+	=========================== */
 .noindex-seo-card {
 	background: #fff;
 	border-radius: 8px;
@@ -136,8 +136,8 @@
 }
 
 /* ===========================
-   Option Items
-   =========================== */
+	Option Items
+	=========================== */
 .noindex-seo-option {
 	display: flex;
 	align-items: flex-start;
@@ -189,8 +189,8 @@
 }
 
 /* ===========================
-   Toggle Switch (Modern)
-   =========================== */
+	Toggle Switch (Modern)
+	=========================== */
 .noindex-seo-switch {
 	position: relative;
 	display: inline-block;
@@ -242,8 +242,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Badges & Indicators
-   =========================== */
+	Badges & Indicators
+	=========================== */
 .noindex-seo-badge {
 	display: inline-flex;
 	align-items: center;
@@ -277,8 +277,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   General Config Section
-   =========================== */
+	General Config Section
+	=========================== */
 .noindex-seo-general-config {
 	background: #fffbeb;
 	border: 1px solid #fcd34d;
@@ -313,8 +313,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Alert / Notice
-   =========================== */
+	Alert / Notice
+	=========================== */
 .noindex-seo-alert {
 	background: #fef3c7;
 	border-left: 4px solid #f59e0b;
@@ -339,13 +339,13 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Submit Button
-   =========================== */
+	Submit Button
+	=========================== */
 /* Submit button styles removed - using WordPress default submit_button() */
 
 /* ===========================
-   Search/Filter
-   =========================== */
+	Search/Filter
+	=========================== */
 .noindex-seo-search {
 	margin-bottom: 20px;
 }
@@ -367,8 +367,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Stats/Quick Info
-   =========================== */
+	Stats/Quick Info
+	=========================== */
 .noindex-seo-stats {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -400,8 +400,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   View Link
-   =========================== */
+	View Link
+	=========================== */
 .noindex-seo-view-link {
 	color: #667eea;
 	text-decoration: none;
@@ -425,8 +425,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Responsive Design
-   =========================== */
+	Responsive Design
+	=========================== */
 @media (max-width: 782px) {
 	.noindex-seo-card-body {
 		grid-template-columns: 1fr;
@@ -447,8 +447,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Success Message
-   =========================== */
+	Success Message
+	=========================== */
 .noindex-seo-success {
 	background: #dcfce7;
 	border-left: 4px solid #16a34a;
@@ -484,8 +484,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Loading State
-   =========================== */
+	Loading State
+	=========================== */
 .noindex-seo-loading {
 	opacity: 0.6;
 	pointer-events: none;
@@ -519,8 +519,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Tooltips
-   =========================== */
+	Tooltips
+	=========================== */
 .noindex-seo-tooltip {
 	position: relative;
 	display: inline-block;
@@ -539,8 +539,8 @@ input:checked + .noindex-seo-slider:before {
 }
 
 /* ===========================
-   Print Styles
-   =========================== */
+	Print Styles
+	=========================== */
 @media print {
 	.noindex-seo-search {
 		display: none;

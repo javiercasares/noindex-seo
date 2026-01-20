@@ -188,12 +188,12 @@ add_action( 'admin_enqueue_scripts', 'noindex_seo_enqueue_admin_assets' );
  * @return void
  */
 function noindex_seo_enqueue_admin_assets( $hook ) {
-	// Only load on our settings page.
+	// Only load on our settings page..
 	if ( 'settings_page_noindex_seo' !== $hook ) {
 		return;
 	}
 
-	// Enqueue admin CSS.
+	// Enqueue admin CSS..
 	wp_enqueue_style(
 		'noindex-seo-admin',
 		plugins_url( 'assets/css/admin.css', __FILE__ ),
@@ -202,7 +202,7 @@ function noindex_seo_enqueue_admin_assets( $hook ) {
 		'all'
 	);
 
-	// Enqueue admin JavaScript.
+	// Enqueue admin JavaScript..
 	wp_enqueue_script(
 		'noindex-seo-admin',
 		plugins_url( 'assets/js/admin.js', __FILE__ ),
@@ -211,7 +211,7 @@ function noindex_seo_enqueue_admin_assets( $hook ) {
 		true
 	);
 
-	// Localize script with translations.
+	// Localize script with translations..
 	wp_localize_script(
 		'noindex-seo-admin',
 		'noindexSeoAdmin',
@@ -334,7 +334,7 @@ function noindex_seo_register() {
 		)
 	);
 
-	// Hook to settings update to clear transient cache.
+	// Hook to settings update to clear transient cache..
 	// Note: Hook receives $old_value and $value parameters but we don't need them.
 	add_action( 'update_option_noindexseo', 'noindex_seo_clear_transient', 10, 0 );
 }
@@ -354,12 +354,12 @@ function noindex_seo_register() {
  * @return void
  */
 function noindex_seo_clear_transient() {
-	// Verify we're in a valid admin context.
+	// Verify we're in a valid admin context..
 	if ( ! is_admin() && ! wp_doing_ajax() ) {
 		return;
 	}
 
-	// Delete the transient cache.
+	// Delete the transient cache..
 	delete_transient( 'noindex_seo_options' );
 }
 
@@ -386,12 +386,12 @@ function noindex_seo_detect_conflicts() {
 
 	if ( ! absint( $option_config_seoplugins ) ) {
 
-		// Include the plugin.php file if the function is not available.
+		// Include the plugin.php file if the function is not available..
 		if ( ! function_exists( 'is_plugin_active' ) ) {
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		// Define an associative array of conflicting plugins: slug/file => real plugin name.
+		// Define an associative array of conflicting plugins: slug/file => real plugin name..
 		$conflicting_plugins = array(
 			'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
 			'premium-seo-pack/index.php'                  => 'Premium SEO Pack',
@@ -403,10 +403,10 @@ function noindex_seo_detect_conflicts() {
 			'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
 		);
 
-		// Iterate through the conflicting plugins to check if any are active.
+		// Iterate through the conflicting plugins to check if any are active..
 		foreach ( $conflicting_plugins as $plugin_path => $plugin_name ) {
 			if ( is_plugin_active( $plugin_path ) ) {
-				// Add an admin notice if a conflicting plugin is active.
+				// Add an admin notice if a conflicting plugin is active..
 				add_action(
 					'admin_notices',
 					function () use ( $plugin_name ) {
@@ -472,12 +472,12 @@ function noindex_seo_process_form() {
 		'year',
 	);
 
-	// Reset all options to 0.
+	// Reset all options to 0..
 	foreach ( $settings as $setting ) {
 		update_option( 'noindex_seo_' . $setting, 0 );
 	}
 
-	// Save only active options (checked checkboxes).
+	// Save only active options (checked checkboxes)..
 	foreach ( $settings as $setting ) {
 		$option_key   = 'noindex_seo_' . $setting;
 		$option_value = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
@@ -488,17 +488,17 @@ function noindex_seo_process_form() {
 		}
 	}
 
-	// Save general configuration option.
+	// Save general configuration option..
 	$config_value = isset( $_POST['noindex_seo_config_seoplugins'] )
 		? absint( $_POST['noindex_seo_config_seoplugins'] )
 		: 0;
 
-	// Ensure value is either 0 or 1.
+	// Ensure value is either 0 or 1..
 	$config_value = ( 1 === $config_value ) ? 1 : 0;
 
 	update_option( 'noindex_seo_config_seoplugins', $config_value );
 
-	// Clear cache.
+	// Clear cache..
 	delete_transient( 'noindex_seo_options' );
 
 	wp_safe_redirect( admin_url( 'options-general.php?page=noindex_seo&updated=true' ) );
@@ -524,7 +524,7 @@ add_action( 'admin_post_update_noindex_seo', 'noindex_seo_process_form' );
  * @return void
  */
 function noindex_seo_admin() {
-	// Verify user capabilities for defense in depth.
+	// Verify user capabilities for defense in depth..
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die(
 			esc_html__( 'You do not have sufficient permissions to access this page.', 'noindex-seo' ),
@@ -533,7 +533,7 @@ function noindex_seo_admin() {
 		);
 	}
 
-	// Define section icons (using Dashicons).
+	// Define section icons (using Dashicons)..
 	$section_icons = array(
 		'main_pages'  => 'dashicons-admin-home',
 		'pages_posts' => 'dashicons-admin-page',
@@ -547,7 +547,7 @@ function noindex_seo_admin() {
 		'error_page'  => 'dashicons-warning',
 	);
 
-	// Define sections and their respective settings.
+	// Define sections and their respective settings..
 	$sections = array(
 		'main_pages'  => array(
 			'title'  => __( 'Main Pages', 'noindex-seo' ),
@@ -736,7 +736,7 @@ function noindex_seo_admin() {
 		),
 	);
 
-	// Get config option.
+	// Get config option..
 	$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
 	?>
 
@@ -818,15 +818,15 @@ function noindex_seo_admin() {
 					<div class="noindex-seo-card-body">
 						<?php foreach ( $section['fields'] as $field_id => $field ) : ?>
 							<?php
-							// Check for conditional display.
+							// Check for conditional display..
 							if ( isset( $field['conditional'] ) && ! $field['conditional'] ) {
 								continue;
 							}
 
-							// Get current option value.
+							// Get current option value..
 							$option = get_option( 'noindex_seo_' . $field_id, 0 );
 
-							// Prepare badge class.
+							// Prepare badge class..
 							$badge_class = $field['suggestion'] ? 'recommended' : 'not-recommended';
 							?>
 							<div class="noindex-seo-option">
