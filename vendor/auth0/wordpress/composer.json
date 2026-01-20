@@ -1,0 +1,118 @@
+{
+    "name": "auth0/wordpress",
+    "description": "WordPress Plugin for Auth0",
+    "license": "MIT",
+    "type": "wordpress-plugin",
+    "keywords": [
+        "auth0",
+        "authentication",
+        "authorization",
+        "login",
+        "auth",
+        "jwt",
+        "json web token",
+        "jwk",
+        "json web key",
+        "oauth",
+        "openid",
+        "secure",
+        "protect",
+        "api"
+    ],
+    "authors": [
+        {
+            "name": "Auth0",
+            "email": "support@auth0.com",
+            "homepage": "https://auth0.com/"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/auth0/wp-auth0/issues",
+        "forum": "https://community.auth0.com/tags/wordpress",
+        "source": "https://github.com/auth0/wp-auth0",
+        "docs": "https://auth0.com/docs/customize/integrations/cms/wordpress-plugin"
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "auth0/auth0-php": "^8.18",
+        "psr/cache": "^3.0"
+    },
+    "require-dev": {
+        "humbug/php-scoper": "^0.18",
+        "buggregator/trap": "^1",
+        "ergebnis/composer-normalize": "^2",
+        "friendsofphp/php-cs-fixer": "^3",
+        "hyperf/event": "^2",
+        "mockery/mockery": "^1",
+        "nyholm/psr7": "^1",
+        "pestphp/pest": "^2",
+        "phpstan/phpstan": "^1",
+        "phpstan/phpstan-strict-rules": "^1",
+        "psr-mock/http": "^1",
+        "rector/rector": "0.17.0",
+        "symfony/cache": "^6",
+        "szepeviktor/phpstan-wordpress": "^1",
+        "vimeo/psalm": "^5",
+        "wikimedia/composer-merge-plugin": "^2"
+    },
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Auth0\\WordPress\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Auth0\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": false,
+            "wikimedia/composer-merge-plugin": true
+        },
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "process-timeout": 0,
+        "sort-packages": true
+    },
+    "extra": {
+        "merge-plugin": {
+            "ignore-duplicates": false,
+            "include": [
+                "composer.local.json"
+            ],
+            "merge-dev": true,
+            "merge-extra": false,
+            "merge-extra-deep": false,
+            "merge-scripts": false,
+            "recurse": true,
+            "replace": true
+        }
+    },
+    "scripts": {
+        "build": "./build.sh",
+        "pest": "@php vendor/bin/pest --order-by random --fail-on-risky --parallel --no-progress",
+        "pest:coverage": "@php vendor/bin/pest --order-by random --fail-on-risky --coverage --parallel --no-progress",
+        "pest:debug": "@php vendor/bin/pest --log-events-verbose-text pest.log --display-errors --fail-on-risky --no-progress",
+        "pest:profile": "@php vendor/bin/pest --profile",
+        "phpcs": "@php vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "phpcs:fix": "@php vendor/bin/php-cs-fixer fix",
+        "phpstan": "@php vendor/bin/phpstan analyze",
+        "psalm": "@php vendor/bin/psalm",
+        "psalm:fix": "@php vendor/bin/psalter --issues=all",
+        "rector": "@php vendor/bin/rector process src --dry-run",
+        "rector:fix": "@php vendor/bin/rector process src",
+        "test": [
+            "@pest",
+            "@phpstan",
+            "@psalm",
+            "@rector",
+            "@phpcs"
+        ]
+    }
+}
