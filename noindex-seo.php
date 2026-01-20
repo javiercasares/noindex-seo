@@ -59,13 +59,20 @@ function noindex_seo_metarobots( string $method = 'meta', array $directives = ar
 	}
 
 	// Send HTTP header if requested.
-	if ( in_array( $method, array( 'header', 'both' ), true ) && ! headers_sent() ) {
-		$header_value = implode( ', ', $directives );
-		header( 'X-Robots-Tag: ' . $header_value, false );
+	$header_sent = false;
+	if ( in_array( $method, array( 'header', 'both' ), true ) ) {
+		if ( ! headers_sent() ) {
+			$header_value = implode( ', ', $directives );
+			header( 'X-Robots-Tag: ' . $header_value, false );
+			$header_sent = true;
+		}
 	}
 
-	// Add HTML meta tag if requested.
-	if ( in_array( $method, array( 'meta', 'both' ), true ) ) {
+	// Add HTML meta tag if requested, or as fallback if headers already sent.
+	$use_meta = in_array( $method, array( 'meta', 'both' ), true );
+	$fallback_needed = in_array( $method, array( 'header', 'both' ), true ) && ! $header_sent;
+
+	if ( $use_meta || $fallback_needed ) {
 		add_filter(
 			'wp_robots',
 			function ( array $robots ) use ( $directives ): array {
@@ -73,8 +80,27 @@ function noindex_seo_metarobots( string $method = 'meta', array $directives = ar
 					$robots[ $directive ] = true;
 				}
 				return $robots;
-			}
+			},
+			99 // High priority to ensure our directives take precedence over other plugins.
 		);
+	}
+}
+
+/**
+ * Clear all robots directive meta values for a post.
+ *
+ * This helper function deletes all robots directive post meta fields for a given post ID.
+ * Used when disabling granular control override or resetting directive settings.
+ *
+ * @since 2.0.0
+ *
+ * @param int $post_id The post ID to clear directives for.
+ * @return void
+ */
+function noindex_seo_clear_post_directives( int $post_id ): void {
+	$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+	foreach ( $directives as $directive ) {
+		delete_post_meta( $post_id, '_noindex_seo_' . $directive );
 	}
 }
 
@@ -202,6 +228,11 @@ function noindex_seo_show(): void {
 	}
 
 	// Define current conditions, ordered from most specific to most general.
+	// Note on 'date' context: is_date() returns true for any date-based archive (day/month/year/time).
+	// In normal WordPress, if is_date() is true, at least one specific date function should also be true.
+	// However, this catch-all condition is kept for edge cases, custom implementations, or future
+	// WordPress versions that might introduce new date archive types not covered by the specific functions.
+	// While this condition may rarely (or never) be true in practice, it provides defensive coverage.
 	$current_conditions = array(
 		'single'            => is_single(),
 		'page'              => is_page(),
@@ -215,7 +246,7 @@ function noindex_seo_show(): void {
 		'month'             => is_month(),
 		'year'              => is_year(),
 		'time'              => is_time(),
-		'date'              => is_date() && ! ( is_day() || is_month() || is_year() || is_time() ),
+		'date'              => is_date() && ! ( is_day() || is_month() || is_year() || is_time() ), // Catch-all for date archives.
 		'archive'           => is_archive() && ! ( is_category() || is_tag() || is_author() || is_post_type_archive() || is_date() ),
 		'search'            => is_search(),
 		'error'             => is_404(),
@@ -1070,11 +1101,7 @@ function noindex_seo_save_post_meta( int $post_id ): void {
 		}
 	} else {
 		// If override is disabled, delete all directive meta.
-		delete_post_meta( $post_id, '_noindex_seo_noindex' );
-		delete_post_meta( $post_id, '_noindex_seo_nofollow' );
-		delete_post_meta( $post_id, '_noindex_seo_noarchive' );
-		delete_post_meta( $post_id, '_noindex_seo_nosnippet' );
-		delete_post_meta( $post_id, '_noindex_seo_noimageindex' );
+		noindex_seo_clear_post_directives( $post_id );
 	}
 }
 add_action( 'save_post', 'noindex_seo_save_post_meta' );
@@ -1195,10 +1222,10 @@ function noindex_seo_display_custom_column( string $column, int $post_id ): void
 }
 
 // Register column hooks for all public post types.
-$post_types = get_post_types( array( 'public' => true ), 'names' );
-foreach ( $post_types as $post_type ) {
-	add_filter( "manage_{$post_type}_posts_columns", 'noindex_seo_add_custom_column' );
-	add_action( "manage_{$post_type}_posts_custom_column", 'noindex_seo_display_custom_column', 10, 2 );
+$noindex_seo_post_types_columns = get_post_types( array( 'public' => true ), 'names' );
+foreach ( $noindex_seo_post_types_columns as $noindex_seo_post_type_column ) {
+	add_filter( "manage_{$noindex_seo_post_type_column}_posts_columns", 'noindex_seo_add_custom_column' );
+	add_action( "manage_{$noindex_seo_post_type_column}_posts_custom_column", 'noindex_seo_display_custom_column', 10, 2 );
 }
 
 /**
@@ -1209,10 +1236,10 @@ foreach ( $post_types as $post_type ) {
  * @since 2.0.0
  *
  * @param string $column_name Column name.
- * @param string $post_type   Post type.
+ * @param string $post_type   Post type (unused but required by hook).
  * @return void
  */
-function noindex_seo_quick_edit_fields( string $column_name, string $post_type ): void {
+function noindex_seo_quick_edit_fields( string $column_name, string $post_type ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	// Check if granular control is enabled.
 	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
 	if ( ! $granular_enabled ) {
@@ -1350,11 +1377,7 @@ function noindex_seo_save_quick_edit( int $post_id ): void {
 			update_post_meta( $post_id, '_noindex_seo_' . $directive, $value );
 		}
 	} else {
-		delete_post_meta( $post_id, '_noindex_seo_noindex' );
-		delete_post_meta( $post_id, '_noindex_seo_nofollow' );
-		delete_post_meta( $post_id, '_noindex_seo_noarchive' );
-		delete_post_meta( $post_id, '_noindex_seo_nosnippet' );
-		delete_post_meta( $post_id, '_noindex_seo_noimageindex' );
+		noindex_seo_clear_post_directives( $post_id );
 	}
 }
 add_action( 'save_post', 'noindex_seo_save_quick_edit' );
@@ -1399,23 +1422,83 @@ function noindex_seo_handle_bulk_actions( string $redirect_to, string $action, a
 		return $redirect_to;
 	}
 
-	if ( 'noindex_seo_enable_override' === $action ) {
-		foreach ( $post_ids as $post_id ) {
-			update_post_meta( $post_id, '_noindex_seo_override', 1 );
+	// Validate that we have post IDs to process.
+	if ( empty( $post_ids ) ) {
+		return $redirect_to;
+	}
+
+	// Check user permissions - user must be able to edit posts.
+	if ( ! current_user_can( 'edit_posts' ) ) {
+		return $redirect_to;
+	}
+
+	// Filter post IDs to only include ones the current user can edit.
+	$editable_post_ids = array();
+	foreach ( $post_ids as $post_id ) {
+		$post_id = intval( $post_id );
+		if ( $post_id > 0 && current_user_can( 'edit_post', $post_id ) ) {
+			$editable_post_ids[] = $post_id;
 		}
+	}
+
+	// If no editable posts remain after filtering, return early.
+	if ( empty( $editable_post_ids ) ) {
+		return $redirect_to;
+	}
+
+	// Replace original post IDs with filtered list.
+	$post_ids = $editable_post_ids;
+
+	global $wpdb;
+
+	if ( 'noindex_seo_enable_override' === $action ) {
+		// Use direct SQL for better performance with large selections.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// Direct database queries are necessary here for performance with bulk operations.
+		// This is an INSERT/UPDATE operation, so caching is not applicable.
+
+		// Update or insert override meta for all selected posts.
+		foreach ( $post_ids as $post_id ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES (%d, '_noindex_seo_override', '1') ON DUPLICATE KEY UPDATE meta_value = '1'",
+					$post_id
+				)
+			);
+		}
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 		$redirect_to = add_query_arg( 'noindex_seo_bulk_enabled', count( $post_ids ), $redirect_to );
 	}
 
 	if ( 'noindex_seo_disable_override' === $action ) {
-		foreach ( $post_ids as $post_id ) {
-			update_post_meta( $post_id, '_noindex_seo_override', 0 );
-			// Also delete all directive meta.
-			delete_post_meta( $post_id, '_noindex_seo_noindex' );
-			delete_post_meta( $post_id, '_noindex_seo_nofollow' );
-			delete_post_meta( $post_id, '_noindex_seo_noarchive' );
-			delete_post_meta( $post_id, '_noindex_seo_nosnippet' );
-			delete_post_meta( $post_id, '_noindex_seo_noimageindex' );
+		// Use direct SQL for better performance with large selections.
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// Direct database queries are necessary here for performance with bulk operations.
+		// This is an UPDATE/DELETE operation, so caching is not applicable.
+
+		// Update override meta to 0 for all selected posts.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = '0' WHERE meta_key = '_noindex_seo_override' AND post_id IN (" . implode( ',', array_fill( 0, count( $post_ids ), '%d' ) ) . ')',
+				...$post_ids
+			)
+		);
+
+		// Delete all directive meta for selected posts.
+		$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+		foreach ( $directives as $directive ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_fill( 0, count( $post_ids ), '%d' ) ) . ')',
+					'_noindex_seo_' . $directive,
+					...$post_ids
+				)
+			);
 		}
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 		$redirect_to = add_query_arg( 'noindex_seo_bulk_disabled', count( $post_ids ), $redirect_to );
 	}
 
@@ -1430,7 +1513,9 @@ function noindex_seo_handle_bulk_actions( string $redirect_to, string $action, a
  * @return void
  */
 function noindex_seo_bulk_actions_admin_notice(): void {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- URL parameter from redirect after bulk action, not form data.
 	if ( ! empty( $_REQUEST['noindex_seo_bulk_enabled'] ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- URL parameter from redirect after bulk action, not form data.
 		$count = absint( $_REQUEST['noindex_seo_bulk_enabled'] );
 		printf(
 			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
@@ -1449,7 +1534,9 @@ function noindex_seo_bulk_actions_admin_notice(): void {
 		);
 	}
 
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- URL parameter from redirect after bulk action, not form data.
 	if ( ! empty( $_REQUEST['noindex_seo_bulk_disabled'] ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- URL parameter from redirect after bulk action, not form data.
 		$count = absint( $_REQUEST['noindex_seo_bulk_disabled'] );
 		printf(
 			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
@@ -1471,10 +1558,10 @@ function noindex_seo_bulk_actions_admin_notice(): void {
 add_action( 'admin_notices', 'noindex_seo_bulk_actions_admin_notice' );
 
 // Register bulk actions for all public post types.
-$post_types_bulk = get_post_types( array( 'public' => true ), 'names' );
-foreach ( $post_types_bulk as $post_type_bulk ) {
-	add_filter( "bulk_actions-edit-{$post_type_bulk}", 'noindex_seo_register_bulk_actions' );
-	add_filter( "handle_bulk_actions-edit-{$post_type_bulk}", 'noindex_seo_handle_bulk_actions', 10, 3 );
+$noindex_seo_post_types_bulk = get_post_types( array( 'public' => true ), 'names' );
+foreach ( $noindex_seo_post_types_bulk as $noindex_seo_post_type_bulk ) {
+	add_filter( "bulk_actions-edit-{$noindex_seo_post_type_bulk}", 'noindex_seo_register_bulk_actions' );
+	add_filter( "handle_bulk_actions-edit-{$noindex_seo_post_type_bulk}", 'noindex_seo_handle_bulk_actions', 10, 3 );
 }
 
 /**
@@ -1484,17 +1571,18 @@ foreach ( $post_types_bulk as $post_type_bulk ) {
  *
  * @since 2.0.0
  *
- * @param string $post_type Current post type.
+ * @param string $post_type Current post type (unused but required by hook).
  * @return void
  */
-function noindex_seo_add_list_filter( string $post_type ): void {
+function noindex_seo_add_list_filter( string $post_type ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 	// Check if granular control is enabled.
 	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
 	if ( ! $granular_enabled ) {
 		return;
 	}
 
-	// Get current filter value.
+	// Get current filter value from URL parameters (not a form submission, no nonce needed).
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- URL parameter for filtering, not form data.
 	$current_filter = isset( $_GET['noindex_seo_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['noindex_seo_filter'] ) ) : '';
 
 	?>
@@ -1533,11 +1621,13 @@ function noindex_seo_filter_posts_by_override( WP_Query $query ): void {
 		return;
 	}
 
-	// Check if filter is set.
+	// Check if filter is set (URL parameter, not form submission, no nonce needed).
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- URL parameter for filtering, not form data.
 	if ( ! isset( $_GET['noindex_seo_filter'] ) || empty( $_GET['noindex_seo_filter'] ) ) {
 		return;
 	}
 
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- URL parameter for filtering, not form data.
 	$filter = sanitize_text_field( wp_unslash( $_GET['noindex_seo_filter'] ) );
 
 	// Build meta query.
@@ -1573,14 +1663,17 @@ function noindex_seo_filter_posts_by_override( WP_Query $query ): void {
 add_action( 'pre_get_posts', 'noindex_seo_filter_posts_by_override' );
 
 // Register filter dropdown for all public post types.
-$post_types_filter = get_post_types( array( 'public' => true ), 'names' );
-foreach ( $post_types_filter as $post_type_filter ) {
-	add_action( "restrict_manage_posts", function() use ( $post_type_filter ) {
-		global $typenow;
-		if ( $typenow === $post_type_filter ) {
-			noindex_seo_add_list_filter( $post_type_filter );
+$noindex_seo_post_types_filter = get_post_types( array( 'public' => true ), 'names' );
+foreach ( $noindex_seo_post_types_filter as $noindex_seo_post_type_filter ) {
+	add_action(
+		'restrict_manage_posts',
+		function () use ( $noindex_seo_post_type_filter ) {
+			global $typenow;
+			if ( $typenow === $noindex_seo_post_type_filter ) {
+				noindex_seo_add_list_filter( $noindex_seo_post_type_filter );
+			}
 		}
-	} );
+	);
 }
 
 /**

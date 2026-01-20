@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Define contexts and directives.
-$contexts   = array(
+$noindex_seo_contexts   = array(
 	'error',
 	'archive',
 	'attachment',
@@ -46,12 +46,12 @@ $contexts   = array(
 	'time',
 	'year',
 );
-$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+$noindex_seo_directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
 
 // Delete all directive options for each context.
-foreach ( $contexts as $context ) {
-	foreach ( $directives as $directive ) {
-		delete_option( $directive . '_seo_' . $context );
+foreach ( $noindex_seo_contexts as $noindex_seo_context ) {
+	foreach ( $noindex_seo_directives as $noindex_seo_directive ) {
+		delete_option( $noindex_seo_directive . '_seo_' . $noindex_seo_context );
 	}
 }
 
@@ -72,8 +72,8 @@ global $wpdb;
 // This is a DELETE operation (not SELECT), so caching is not applicable.
 // Using wildcards with delete_option() is not possible, requiring direct SQL.
 // Clean up all directive-related options (noindex, nofollow, noarchive, nosnippet, noimageindex).
-foreach ( $directives as $directive ) {
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $directive . '_seo_%' ) );
+foreach ( $noindex_seo_directives as $noindex_seo_directive ) {
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $noindex_seo_directive . '_seo_%' ) );
 }
 
 // Clean up transients.

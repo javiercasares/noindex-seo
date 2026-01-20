@@ -66,14 +66,26 @@
 				const cardId      = card.attr( 'id' );
 				const isCollapsed = card.hasClass( 'collapsed' );
 
-				let collapsedCards     = JSON.parse( localStorage.getItem( 'noindexSeoCollapsed' ) || '{}' );
+				let collapsedCards = {};
+				try {
+					collapsedCards = JSON.parse( localStorage.getItem( 'noindexSeoCollapsed' ) || '{}' );
+				} catch (e) {
+					// If localStorage is corrupted, reset to empty object.
+					collapsedCards = {};
+				}
 				collapsedCards[cardId] = isCollapsed;
 				localStorage.setItem( 'noindexSeoCollapsed', JSON.stringify( collapsedCards ) );
 			}
 		);
 
 		// Restore collapsed states.
-		const collapsedCards = JSON.parse( localStorage.getItem( 'noindexSeoCollapsed' ) || '{}' );
+		let collapsedCards = {};
+		try {
+			collapsedCards = JSON.parse( localStorage.getItem( 'noindexSeoCollapsed' ) || '{}' );
+		} catch (e) {
+			// If localStorage is corrupted, reset to empty object.
+			collapsedCards = {};
+		}
 		Object.keys( collapsedCards ).forEach(
 			function (cardId) {
 				if (collapsedCards[cardId]) {

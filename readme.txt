@@ -9,7 +9,7 @@ Version: 2.0.0
 License: GPL-2.0-or-later
 License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
 
-Control search engine behavior with 5 independent robots directives (noindex, nofollow, noarchive, nosnippet, noimageindex) using HTML meta tags or HTTP headers.
+Control search engine indexing with 5 robots directives using HTML meta tags or HTTP headers.
 
 == Description ==
 
