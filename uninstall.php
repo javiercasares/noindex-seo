@@ -10,13 +10,15 @@
  * @since 2.0.0 Added cleanup for new implementation method option and transients.
  */
 
+declare(strict_types=1);
+
 // Exit if uninstall not called from WordPress.
 if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
 // Delete all noindex context options.
-$context_options = array(
+$context_options = [
 	'noindex_seo_archive',
 	'noindex_seo_attachment',
 	'noindex_seo_author',
@@ -42,7 +44,7 @@ $context_options = array(
 	'noindex_seo_tag',
 	'noindex_seo_time',
 	'noindex_seo_year',
-);
+];
 
 foreach ( $context_options as $option ) {
 	delete_option( $option );
