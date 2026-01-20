@@ -179,6 +179,54 @@ add_action( 'template_redirect', 'noindex_seo_show' );
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'noindex_seo_settings_link' );
 add_action( 'admin_init', 'noindex_seo_register' );
 add_action( 'admin_menu', 'noindex_seo_menu' );
+add_action( 'admin_enqueue_scripts', 'noindex_seo_enqueue_admin_assets' );
+
+/**
+ * Enqueues admin CSS and JavaScript assets.
+ *
+ * Loads the modern admin panel styles and interactive JavaScript only on the
+ * noindex SEO settings page for better performance.
+ *
+ * @since 2.0.0
+ *
+ * @param string $hook The current admin page hook.
+ * @return void
+ */
+function noindex_seo_enqueue_admin_assets( $hook ) {
+	// Only load on our settings page.
+	if ( 'settings_page_noindex_seo' !== $hook ) {
+		return;
+	}
+
+	// Enqueue admin CSS.
+	wp_enqueue_style(
+		'noindex-seo-admin',
+		plugins_url( 'assets/css/admin.css', __FILE__ ),
+		array(),
+		'2.0.0',
+		'all'
+	);
+
+	// Enqueue admin JavaScript.
+	wp_enqueue_script(
+		'noindex-seo-admin',
+		plugins_url( 'assets/js/admin.js', __FILE__ ),
+		array( 'jquery' ),
+		'2.0.0',
+		true
+	);
+
+	// Localize script with translations.
+	wp_localize_script(
+		'noindex-seo-admin',
+		'noindexSeoAdmin',
+		array(
+			'successMessage' => __( 'Settings saved successfully!', 'noindex-seo' ),
+			'expandAll'      => __( 'Expand All', 'noindex-seo' ),
+			'collapseAll'    => __( 'Collapse All', 'noindex-seo' ),
+		)
+	);
+}
 
 /**
  * Adds a "Settings" link to the plugin row actions on the Plugins admin screen.
@@ -464,19 +512,19 @@ function noindex_seo_process_form() {
 add_action( 'admin_post_update_noindex_seo', 'noindex_seo_process_form' );
 
 /**
- * Renders the settings page for the 'noindex SEO' plugin in the WordPress admin.
+ * Renders the modern, visual settings page for the 'noindex SEO' plugin.
  *
- * This function outputs the full HTML for the plugin's settings interface, including:
- * - General configuration (e.g., disabling conflict notices)
- * - A structured list of SEO-related options grouped by context (main pages, archives, taxonomies, etc.)
- *
- * Each context is represented as a checkbox that allows the administrator to enable or disable
- * the `noindex` meta directive for that specific section of the site.
- *
- * The form is submitted via `admin-post.php` and processed by {@see noindex_seo_process_form()}.
- * Security is enforced with a nonce field. Options are retrieved using `get_option()` for each field.
+ * This function outputs a completely redesigned admin interface with:
+ * - Modern card-based layout
+ * - Toggle switches instead of checkboxes
+ * - Tabbed navigation for better organization
+ * - Visual indicators and badges
+ * - Collapsible sections
+ * - Search/filter functionality
+ * - Statistics dashboard
  *
  * @since 1.0.0
+ * @since 2.0.0 Completely redesigned with modern UI/UX.
  *
  * @return void
  */
@@ -490,6 +538,20 @@ function noindex_seo_admin() {
 		);
 	}
 
+	// Define section icons (using Dashicons).
+	$section_icons = array(
+		'main_pages'  => 'dashicons-admin-home',
+		'pages_posts' => 'dashicons-admin-page',
+		'taxonomies'  => 'dashicons-category',
+		'dates'       => 'dashicons-calendar-alt',
+		'archives'    => 'dashicons-archive',
+		'pagination'  => 'dashicons-ellipsis',
+		'search'      => 'dashicons-search',
+		'attachments' => 'dashicons-paperclip',
+		'previews'    => 'dashicons-visibility',
+		'error_page'  => 'dashicons-warning',
+	);
+
 	// Define sections and their respective settings.
 	$sections = array(
 		'main_pages'  => array(
@@ -499,14 +561,14 @@ function noindex_seo_admin() {
 					'label'       => __( 'Front Page', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of the site\'s front page.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of the site\'s front page.', 'noindex-seo' ),
 					'view_url'    => get_site_url(),
 				),
 				'home'       => array(
 					'label'       => __( 'Home', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of the site\'s home page.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of the site\'s home page.', 'noindex-seo' ),
 					'view_url'    => get_home_url(),
 				),
 			),
@@ -518,27 +580,27 @@ function noindex_seo_admin() {
 					'label'       => __( 'Page', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of the site\'s pages.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of site pages.', 'noindex-seo' ),
 				),
 				'privacy_policy' => array(
 					'label'       => __( 'Privacy Policy', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of the site\'s privacy policy page.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of the privacy policy page.', 'noindex-seo' ),
 					'view_url'    => get_privacy_policy_url(),
 					'conditional' => version_compare( $GLOBALS['wp_version'], '5.2', '>=' ),
 				),
 				'single'         => array(
-					'label'       => __( 'Single', 'noindex-seo' ),
+					'label'       => __( 'Single Post', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of a post on the site.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of individual posts.', 'noindex-seo' ),
 				),
 				'singular'       => array(
 					'label'       => __( 'Singular', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of a post or a page of the site.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of any singular content (post or page).', 'noindex-seo' ),
 				),
 			),
 		),
@@ -549,48 +611,48 @@ function noindex_seo_admin() {
 					'label'       => __( 'Category', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of the site categories. The lists where the posts appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of category archive pages.', 'noindex-seo' ),
 				),
 				'tag'      => array(
 					'label'       => __( 'Tag', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of the site\'s tags. The lists where the posts appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of tag archive pages.', 'noindex-seo' ),
 				),
 			),
 		),
 		'dates'       => array(
-			'title'  => __( 'Dates', 'noindex-seo' ),
+			'title'  => __( 'Date Archives', 'noindex-seo' ),
 			'fields' => array(
 				'date'  => array(
 					'label'       => __( 'Date', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of any date-based archive page (i.e., monthly, yearly, daily, or time-based archive) of the site. The lists where the posts appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of any date-based archive page.', 'noindex-seo' ),
 				),
 				'day'   => array(
 					'label'       => __( 'Day', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of a daily archive of the site. The lists where the posts appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of daily archive pages.', 'noindex-seo' ),
 				),
 				'month' => array(
 					'label'       => __( 'Month', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of a monthly archive of the site. The lists where the posts appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of monthly archive pages.', 'noindex-seo' ),
 				),
 				'time'  => array(
 					'label'       => __( 'Time', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of an hourly, "minutely", or "secondly" archive of the site. The lists where the posts appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of time-based archive pages.', 'noindex-seo' ),
 				),
 				'year'  => array(
 					'label'       => __( 'Year', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of a yearly archive of the site. The lists where the posts appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of yearly archive pages.', 'noindex-seo' ),
 				),
 			),
 		),
@@ -601,19 +663,19 @@ function noindex_seo_admin() {
 					'label'       => __( 'Archive', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of any type of Archive page. Category, Tag, Author, and Date-based pages are all types of Archives. The lists where the posts appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of any type of archive page.', 'noindex-seo' ),
 				),
 				'author'            => array(
 					'label'       => __( 'Author', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of the author\'s page, where the author\'s publications appear.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of author archive pages.', 'noindex-seo' ),
 				),
 				'post_type_archive' => array(
 					'label'       => __( 'Post Type Archive', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => false,
-					'description' => __( 'This will block the indexing of any post type page.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of post type archive pages.', 'noindex-seo' ),
 				),
 			),
 		),
@@ -621,10 +683,10 @@ function noindex_seo_admin() {
 			'title'  => __( 'Pagination', 'noindex-seo' ),
 			'fields' => array(
 				'paged' => array(
-					'label'       => __( 'Pagination', 'noindex-seo' ),
+					'label'       => __( 'Paginated Pages', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of the pagination, i.e., all pages other than the main page of an archive.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of pagination pages (page 2, 3, etc.).', 'noindex-seo' ),
 				),
 			),
 		),
@@ -632,10 +694,10 @@ function noindex_seo_admin() {
 			'title'  => __( 'Search', 'noindex-seo' ),
 			'fields' => array(
 				'search' => array(
-					'label'       => __( 'Search', 'noindex-seo' ),
+					'label'       => __( 'Search Results', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of the internal search result pages.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of search result pages.', 'noindex-seo' ),
 				),
 			),
 		),
@@ -643,10 +705,10 @@ function noindex_seo_admin() {
 			'title'  => __( 'Attachments', 'noindex-seo' ),
 			'fields' => array(
 				'attachment' => array(
-					'label'       => __( 'Attachment', 'noindex-seo' ),
+					'label'       => __( 'Attachment Pages', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing of an attachment document to a post or page. An attachment is an image or other file uploaded through the post editor\'s upload utility. Attachments can be displayed on their own "page" or template. This will not cause the indexing of the image or file to be blocked.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of attachment pages (does not affect the file itself).', 'noindex-seo' ),
 				),
 			),
 		),
@@ -657,92 +719,166 @@ function noindex_seo_admin() {
 					'label'       => __( 'Customize Preview', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing when content is being displayed in customize mode.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing when content is in customize preview mode.', 'noindex-seo' ),
 				),
 				'preview'           => array(
-					'label'       => __( 'Preview', 'noindex-seo' ),
+					'label'       => __( 'Post Preview', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will block the indexing when a single post is being displayed in draft mode.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing when viewing post previews.', 'noindex-seo' ),
 				),
 			),
 		),
 		'error_page'  => array(
-			'title'  => __( 'Error Page', 'noindex-seo' ),
+			'title'  => __( 'Error Pages', 'noindex-seo' ),
 			'fields' => array(
 				'error' => array(
 					'label'       => __( 'Error 404', 'noindex-seo' ),
 					'recommended' => __( 'Recommended', 'noindex-seo' ),
 					'suggestion'  => true,
-					'description' => __( 'This will cause an error page to be blocked from being indexed. As it is an error page, it should not be indexed per se, but just in case.', 'noindex-seo' ),
+					'description' => __( 'Block the indexing of 404 error pages.', 'noindex-seo' ),
 				),
 			),
 		),
 	);
 
+	// Get config option.
+	$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
 	?>
-	<div class="wrap">
-		<h1><?php echo esc_html( __( 'noindex SEO Settings', 'noindex-seo' ) ); ?></h1>
+
+	<div class="wrap noindex-seo-admin-wrap">
+		<h1><?php esc_html_e( 'noindex SEO Settings', 'noindex-seo' ); ?></h1>
+		<p><?php esc_html_e( 'Control which pages search engines can index on your WordPress site.', 'noindex-seo' ); ?></p>
+
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="update_noindex_seo">
-			<?php
-			wp_nonce_field( 'update_noindex_seo_nonce' );
+			<?php wp_nonce_field( 'update_noindex_seo_nonce' ); ?>
 
-			echo '<h2>' . esc_html( __( 'General Configuration', 'noindex-seo' ) ) . '</h2>';
-			echo '<table class="form-table">';
-			// Get current configuration value.
-			$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
-			echo '<tr>';
-			echo '<th scope="row"><label for="noindex_seo_config_seoplugins">' . esc_html( __( 'Plugin compatibility', 'noindex-seo' ) ) . '</label></th>';
-			echo '<td><fieldset>';
-			echo '<input type="checkbox" id="noindex_seo_config_seoplugins" name="noindex_seo_config_seoplugins" value="1" ' . checked( 1, $option_config_seoplugins, false ) . '> ';
-			echo '<span class="description">' . esc_html( __( 'Do not display the message of possible incompatibilities with other plugins.', 'noindex-seo' ) ) . '</span>';
-			echo '</fieldset></td>';
-			echo '</tr>';
-			echo '</table>';
+			<!-- Statistics Dashboard -->
+			<div class="noindex-seo-stats">
+				<div class="noindex-seo-stat-card">
+					<div class="noindex-seo-stat-number" id="noindex-seo-stat-total">0</div>
+					<div class="noindex-seo-stat-label"><?php esc_html_e( 'Total Options', 'noindex-seo' ); ?></div>
+				</div>
+				<div class="noindex-seo-stat-card">
+					<div class="noindex-seo-stat-number" id="noindex-seo-stat-enabled">0</div>
+					<div class="noindex-seo-stat-label"><?php esc_html_e( 'Enabled', 'noindex-seo' ); ?></div>
+				</div>
+				<div class="noindex-seo-stat-card">
+					<div class="noindex-seo-stat-number" id="noindex-seo-stat-recommended">0</div>
+					<div class="noindex-seo-stat-label"><?php esc_html_e( 'Recommended to Enable', 'noindex-seo' ); ?></div>
+				</div>
+			</div>
 
-			echo '<h2>' . esc_html( __( 'SEO Configuration', 'noindex-seo' ) ) . '</h2>';
-			?>
-			<p><?php echo esc_html( __( 'Important note: if you have any doubt about any of the following items, it is best not to activate the option as you could lose results in the search engines.', 'noindex-seo' ) ); ?></p>
-			<?php
-			foreach ( $sections as $section_id => $section ) {
-				echo '<h3>' . esc_html( $section['title'] ) . '</h3>';
-				echo '<table class="form-table">';
-				foreach ( $section['fields'] as $field_id => $field ) {
-					// Check for conditional display.
-					if ( isset( $field['conditional'] ) && ! $field['conditional'] ) {
-						continue;
-					}
+			<!-- General Configuration -->
+			<div class="noindex-seo-general-config">
+				<h2>
+					<span class="dashicons dashicons-admin-settings"></span>
+					<?php esc_html_e( 'General Configuration', 'noindex-seo' ); ?>
+				</h2>
+				<div class="noindex-seo-config-option">
+					<label class="noindex-seo-switch">
+						<input
+							type="checkbox"
+							id="noindex_seo_config_seoplugins"
+							name="noindex_seo_config_seoplugins"
+							value="1"
+							<?php checked( 1, $option_config_seoplugins ); ?>
+						>
+						<span class="noindex-seo-slider"></span>
+					</label>
+					<label for="noindex_seo_config_seoplugins">
+						<?php esc_html_e( 'Disable compatibility warnings with other SEO plugins', 'noindex-seo' ); ?>
+					</label>
+				</div>
+			</div>
 
-					// Get current option value.
-					$option = get_option( 'noindex_seo_' . $field_id, 0 );
+			<!-- Alert -->
+			<div class="noindex-seo-alert">
+				<span class="dashicons dashicons-warning"></span>
+				<p><?php esc_html_e( 'Important: Enabling noindex on the wrong pages can harm your search engine rankings. Only enable options you fully understand.', 'noindex-seo' ); ?></p>
+			</div>
 
-					echo '<tr>';
-					echo '<th scope="row"><label for="noindex_seo_' . esc_attr( $field_id ) . '">' . esc_html( $field['label'] ) . '</label></th>';
-					echo '<td><fieldset>';
-					echo '<input type="checkbox" id="noindex_seo_' . esc_attr( $field_id ) . '" name="noindex_seo_' . esc_attr( $field_id ) . '" value="1" ' . checked( 1, $option, false ) . '> ';
-					// Prepare dashicon attributes for security.
-				$dashicon_class = $field['suggestion'] ? 'dashicons-yes' : 'dashicons-no';
-				$dashicon_title = $field['suggestion'] ? esc_attr__( 'Yes', 'noindex-seo' ) : esc_attr__( 'No', 'noindex-seo' );
+			<!-- Search Box -->
+			<div class="noindex-seo-search">
+				<input
+					type="search"
+					placeholder="<?php esc_attr_e( 'Search options...', 'noindex-seo' ); ?>"
+					aria-label="<?php esc_attr_e( 'Search options', 'noindex-seo' ); ?>"
+				>
+			</div>
 
-				echo esc_html( $field['recommended'] ) . ': <span class="dashicons ' . esc_attr( $dashicon_class ) . '" title="' . $dashicon_title . '"></span>. ';
+			<!-- Sections as Cards -->
+			<?php foreach ( $sections as $section_id => $section ) : ?>
+				<?php
+				$icon = isset( $section_icons[ $section_id ] ) ? $section_icons[ $section_id ] : 'dashicons-admin-generic';
+				?>
+				<div class="noindex-seo-card" id="noindex-seo-card-<?php echo esc_attr( $section_id ); ?>">
+					<div class="noindex-seo-card-header">
+						<h3>
+							<span class="dashicons <?php echo esc_attr( $icon ); ?>"></span>
+							<?php echo esc_html( $section['title'] ); ?>
+						</h3>
+						<span class="dashicons dashicons-arrow-down-alt2 noindex-seo-card-toggle"></span>
+					</div>
+					<div class="noindex-seo-card-body">
+						<?php foreach ( $section['fields'] as $field_id => $field ) : ?>
+							<?php
+							// Check for conditional display.
+							if ( isset( $field['conditional'] ) && ! $field['conditional'] ) {
+								continue;
+							}
 
-					echo '<span class="description">' . esc_html( $field['description'] ) . '</span>';
+							// Get current option value.
+							$option = get_option( 'noindex_seo_' . $field_id, 0 );
 
-					if ( isset( $field['view_url'] ) ) {
-						echo ' <a href="' . esc_url( $field['view_url'] ) . '" target="_blank">' . esc_html__( 'View', 'noindex-seo' ) . '</a>';
-					}
+							// Prepare badge class.
+							$badge_class = $field['suggestion'] ? 'recommended' : 'not-recommended';
+							?>
+							<div class="noindex-seo-option">
+								<div class="noindex-seo-option-toggle">
+									<label class="noindex-seo-switch">
+										<input
+											type="checkbox"
+											id="noindex_seo_<?php echo esc_attr( $field_id ); ?>"
+											name="noindex_seo_<?php echo esc_attr( $field_id ); ?>"
+											value="1"
+											<?php checked( 1, $option ); ?>
+										>
+										<span class="noindex-seo-slider"></span>
+									</label>
+								</div>
+								<div class="noindex-seo-option-content">
+									<div class="noindex-seo-option-label">
+										<label for="noindex_seo_<?php echo esc_attr( $field_id ); ?>">
+											<?php echo esc_html( $field['label'] ); ?>
+										</label>
+										<span class="noindex-seo-badge <?php echo esc_attr( $badge_class ); ?>">
+											<span class="dashicons <?php echo $field['suggestion'] ? 'dashicons-yes' : 'dashicons-no'; ?>"></span>
+											<?php echo $field['suggestion'] ? esc_html__( 'Recommended', 'noindex-seo' ) : esc_html__( 'Not Recommended', 'noindex-seo' ); ?>
+										</span>
+									</div>
+									<p class="noindex-seo-option-description">
+										<?php echo esc_html( $field['description'] ); ?>
+									</p>
+									<?php if ( isset( $field['view_url'] ) && ! empty( $field['view_url'] ) ) : ?>
+										<div class="noindex-seo-option-meta">
+											<a href="<?php echo esc_url( $field['view_url'] ); ?>" target="_blank" class="noindex-seo-view-link">
+												<span class="dashicons dashicons-external"></span>
+												<?php esc_html_e( 'View Page', 'noindex-seo' ); ?>
+											</a>
+										</div>
+									<?php endif; ?>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+				</div>
+			<?php endforeach; ?>
 
-					echo '</fieldset></td>';
-					echo '</tr>';
-				}
-
-				echo '</table>';
-			}
-
-			?>
 			<?php submit_button(); ?>
 		</form>
 	</div>
+
 	<?php
 }

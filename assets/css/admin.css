@@ -1,0 +1,548 @@
+/**
+ * noindex SEO - Admin Panel Styles
+ * Version: 2.0.0
+ * Modern, visual admin interface
+ */
+
+/* ===========================
+   Container & Layout
+   =========================== */
+.noindex-seo-admin-wrap {
+	max-width: 1200px;
+	margin: 20px 0;
+}
+
+/* Header styles removed - using WordPress default styles */
+
+/* ===========================
+   Tabs Navigation
+   =========================== */
+.noindex-seo-tabs {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 30px;
+	border-bottom: 2px solid #e5e7eb;
+	flex-wrap: wrap;
+}
+
+.noindex-seo-tab {
+	padding: 12px 24px;
+	background: transparent;
+	border: none;
+	color: #6b7280;
+	font-size: 15px;
+	font-weight: 500;
+	cursor: pointer;
+	border-bottom: 3px solid transparent;
+	transition: all 0.3s ease;
+	position: relative;
+	top: 2px;
+}
+
+.noindex-seo-tab:hover {
+	color: #667eea;
+}
+
+.noindex-seo-tab.active {
+	color: #667eea;
+	border-bottom-color: #667eea;
+}
+
+/* ===========================
+   Tab Content
+   =========================== */
+.noindex-seo-tab-content {
+	display: none;
+}
+
+.noindex-seo-tab-content.active {
+	display: block;
+	animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* ===========================
+   Cards / Sections
+   =========================== */
+.noindex-seo-card {
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	margin-bottom: 20px;
+	overflow: hidden;
+	border: 1px solid #e5e7eb;
+}
+
+.noindex-seo-card-header {
+	padding: 20px 24px;
+	background: #f9fafb;
+	border-bottom: 1px solid #e5e7eb;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.noindex-seo-card-header:hover {
+	background: #f3f4f6;
+}
+
+.noindex-seo-card-header h3 {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: #111827;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.noindex-seo-card-header .dashicons {
+	color: #667eea;
+	font-size: 20px;
+	width: 20px;
+	height: 20px;
+}
+
+.noindex-seo-card-toggle {
+	color: #9ca3af;
+	transition: transform 0.3s ease;
+}
+
+.noindex-seo-card.collapsed .noindex-seo-card-toggle {
+	transform: rotate(-90deg);
+}
+
+.noindex-seo-card-body {
+	padding: 24px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 20px;
+}
+
+.noindex-seo-card.collapsed .noindex-seo-card-body {
+	display: none;
+}
+
+/* ===========================
+   Option Items
+   =========================== */
+.noindex-seo-option {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 16px;
+	background: #f9fafb;
+	border-radius: 6px;
+	border: 1px solid #e5e7eb;
+	transition: all 0.2s ease;
+}
+
+.noindex-seo-option:hover {
+	background: #f3f4f6;
+	border-color: #d1d5db;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.noindex-seo-option-toggle {
+	flex-shrink: 0;
+}
+
+.noindex-seo-option-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.noindex-seo-option-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 6px;
+	font-weight: 500;
+	color: #111827;
+	font-size: 14px;
+}
+
+.noindex-seo-option-description {
+	color: #6b7280;
+	font-size: 13px;
+	line-height: 1.5;
+	margin: 0;
+}
+
+.noindex-seo-option-meta {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-top: 8px;
+}
+
+/* ===========================
+   Toggle Switch (Modern)
+   =========================== */
+.noindex-seo-switch {
+	position: relative;
+	display: inline-block;
+	width: 48px;
+	height: 26px;
+}
+
+.noindex-seo-switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.noindex-seo-slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #cbd5e1;
+	transition: 0.3s;
+	border-radius: 34px;
+}
+
+.noindex-seo-slider:before {
+	position: absolute;
+	content: "";
+	height: 20px;
+	width: 20px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	transition: 0.3s;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .noindex-seo-slider {
+	background-color: #667eea;
+}
+
+input:focus + .noindex-seo-slider {
+	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+input:checked + .noindex-seo-slider:before {
+	transform: translateX(22px);
+}
+
+/* ===========================
+   Badges & Indicators
+   =========================== */
+.noindex-seo-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.noindex-seo-badge.recommended {
+	background: #dcfce7;
+	color: #166534;
+}
+
+.noindex-seo-badge.not-recommended {
+	background: #fee2e2;
+	color: #991b1b;
+}
+
+.noindex-seo-badge.neutral {
+	background: #e0e7ff;
+	color: #3730a3;
+}
+
+.noindex-seo-badge .dashicons {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+}
+
+/* ===========================
+   General Config Section
+   =========================== */
+.noindex-seo-general-config {
+	background: #fffbeb;
+	border: 1px solid #fcd34d;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 30px;
+}
+
+.noindex-seo-general-config h2 {
+	margin: 0 0 16px 0;
+	font-size: 18px;
+	color: #92400e;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.noindex-seo-general-config .dashicons {
+	color: #f59e0b;
+}
+
+.noindex-seo-config-option {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.noindex-seo-config-option label {
+	color: #78350f;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+/* ===========================
+   Alert / Notice
+   =========================== */
+.noindex-seo-alert {
+	background: #fef3c7;
+	border-left: 4px solid #f59e0b;
+	padding: 16px 20px;
+	margin-bottom: 24px;
+	border-radius: 4px;
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.noindex-seo-alert .dashicons {
+	color: #d97706;
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.noindex-seo-alert p {
+	margin: 0;
+	color: #92400e;
+	line-height: 1.6;
+}
+
+/* ===========================
+   Submit Button
+   =========================== */
+/* Submit button styles removed - using WordPress default submit_button() */
+
+/* ===========================
+   Search/Filter
+   =========================== */
+.noindex-seo-search {
+	margin-bottom: 20px;
+}
+
+.noindex-seo-search input {
+	width: 100%;
+	max-width: 400px;
+	padding: 10px 16px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	font-size: 14px;
+	transition: all 0.2s ease;
+}
+
+.noindex-seo-search input:focus {
+	outline: none;
+	border-color: #667eea;
+	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===========================
+   Stats/Quick Info
+   =========================== */
+.noindex-seo-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.noindex-seo-stat-card {
+	background: white;
+	padding: 20px;
+	border-radius: 8px;
+	border: 1px solid #e5e7eb;
+	text-align: center;
+}
+
+.noindex-seo-stat-number {
+	font-size: 32px;
+	font-weight: 700;
+	color: #667eea;
+	margin: 0;
+	line-height: 1;
+}
+
+.noindex-seo-stat-label {
+	color: #6b7280;
+	font-size: 13px;
+	margin-top: 8px;
+	font-weight: 500;
+}
+
+/* ===========================
+   View Link
+   =========================== */
+.noindex-seo-view-link {
+	color: #667eea;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 500;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	transition: color 0.2s ease;
+}
+
+.noindex-seo-view-link:hover {
+	color: #764ba2;
+	text-decoration: underline;
+}
+
+.noindex-seo-view-link .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+/* ===========================
+   Responsive Design
+   =========================== */
+@media (max-width: 782px) {
+	.noindex-seo-card-body {
+		grid-template-columns: 1fr;
+	}
+
+	.noindex-seo-tabs {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.noindex-seo-tab {
+		white-space: nowrap;
+	}
+
+	.noindex-seo-stats {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ===========================
+   Success Message
+   =========================== */
+.noindex-seo-success {
+	background: #dcfce7;
+	border-left: 4px solid #16a34a;
+	padding: 16px 20px;
+	margin: 20px 0;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.noindex-seo-success .dashicons {
+	color: #16a34a;
+	flex-shrink: 0;
+}
+
+.noindex-seo-success p {
+	margin: 0;
+	color: #166534;
+	font-weight: 500;
+}
+
+/* ===========================
+   Loading State
+   =========================== */
+.noindex-seo-loading {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+/* Loading state for WordPress default submit button */
+#submit.loading {
+	position: relative;
+	color: transparent !important;
+}
+
+#submit.loading::after {
+	content: "";
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	top: 50%;
+	left: 50%;
+	margin-left: -8px;
+	margin-top: -8px;
+	border: 2px solid #ffffff;
+	border-radius: 50%;
+	border-top-color: transparent;
+	animation: spinner 0.6s linear infinite;
+}
+
+@keyframes spinner {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* ===========================
+   Tooltips
+   =========================== */
+.noindex-seo-tooltip {
+	position: relative;
+	display: inline-block;
+	cursor: help;
+}
+
+.noindex-seo-tooltip .dashicons {
+	color: #9ca3af;
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+.noindex-seo-tooltip:hover .dashicons {
+	color: #667eea;
+}
+
+/* ===========================
+   Print Styles
+   =========================== */
+@media print {
+	.noindex-seo-search {
+		display: none;
+	}
+}
