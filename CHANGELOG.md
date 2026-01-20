@@ -85,6 +85,35 @@ This is a major release that includes comprehensive security hardening and a new
   - Early return when post meta takes precedence
   - Efficient implementation with minimal performance impact
 
+#### Granular Per-Post/Page Control (Phase 2: List & Quick Edit)
+- **Custom Column in Post/Page Lists**
+  - New "Robots" column shows override status for each post
+  - Displays active directives as color-coded badges with emoji icons
+  - Shows "—" for posts without override
+  - Visual indication of which directives are active
+  - Includes hidden data attributes for Quick Edit integration
+
+- **Quick Edit Support**
+  - Edit robots directives without opening full editor
+  - Same interface as meta box (override toggle + 5 checkboxes)
+  - JavaScript auto-populates current values when Quick Edit is opened
+  - Shows/hides directive options based on override checkbox
+  - Validates and saves changes inline
+  - Works alongside standard WordPress Quick Edit fields
+
+- **Bulk Actions**
+  - "Enable Robots Override" bulk action to activate override on multiple posts
+  - "Disable Robots Override" bulk action to deactivate override and clear directives
+  - Success notices show count of posts updated
+  - Translation-ready with plural forms support
+  - Available for all public post types
+
+- **Performance Optimization**
+  - All Phase 2 features only load when granular control is enabled
+  - Minimal database queries using efficient post meta lookups
+  - JavaScript only loads in admin post list screens
+  - Bulk actions process multiple posts efficiently
+
 ### Security
 
 #### Fixed - High Severity
@@ -281,6 +310,51 @@ This is a major release that includes comprehensive security hardening and a new
    - Only saves meta if override is enabled
    - Deletes meta when override is disabled
    - Registered on `save_post` hook
+
+7. **`noindex_seo_add_custom_column()`**
+   - Adds "Robots" column to post/page list tables
+   - Only adds column if granular control is enabled
+   - Inserts after "Title" column
+   - Registered via `manage_{$post_type}_posts_columns` filter
+
+8. **`noindex_seo_display_custom_column()`**
+   - Displays robots directives status in custom column
+   - Shows badges for active directives with emoji icons
+   - Includes hidden data attributes for Quick Edit
+   - Handles cases: no override, override with no directives, override with directives
+   - Registered via `manage_{$post_type}_posts_custom_column` action
+
+9. **`noindex_seo_quick_edit_fields()`**
+   - Adds Quick Edit fields for robots directives
+   - Same interface as meta box (override toggle + 5 checkboxes)
+   - Includes JavaScript for auto-population and toggle behavior
+   - Includes nonce for security
+   - Registered on `quick_edit_custom_box` and `bulk_edit_custom_box` actions
+
+10. **`noindex_seo_save_quick_edit()`**
+    - Saves Quick Edit changes for robots directives
+    - Validates nonce and user permissions
+    - Checks for `_inline_edit` flag to distinguish from regular saves
+    - Same save logic as meta box
+    - Registered on `save_post` hook
+
+11. **`noindex_seo_register_bulk_actions()`**
+    - Registers custom bulk actions for robots directives
+    - Adds "Enable Robots Override" and "Disable Robots Override"
+    - Only registers if granular control is enabled
+    - Registered via `bulk_actions-edit-{$post_type}` filter
+
+12. **`noindex_seo_handle_bulk_actions()`**
+    - Handles custom bulk actions execution
+    - Enables/disables override for multiple posts
+    - Adds query args for admin notices
+    - Registered via `handle_bulk_actions-edit-{$post_type}` filter
+
+13. **`noindex_seo_bulk_actions_admin_notice()`**
+    - Displays success notices after bulk actions
+    - Shows count of posts updated with proper plural forms
+    - Dismissible notices
+    - Registered on `admin_notices` action
 
 ### Compatibility & Migration
 

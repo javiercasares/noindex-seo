@@ -128,7 +128,12 @@ This is a major release with comprehensive security hardening and powerful new r
 * Checkbox-based interface with emoji icons for easy visualization
 * Tooltip descriptions for each directive
 * Multiple directives combined in single meta tag or HTTP header
-* **Granular Per-Post/Page Control (Optional)**: Enable per-content overrides in settings to control directives for individual posts, pages, and custom post types via meta boxes
+* **Granular Per-Post/Page Control (Optional)**:
+  * Enable per-content overrides in settings
+  * Meta boxes in post/page/CPT editors
+  * Custom "Robots" column in post lists
+  * Quick Edit support for fast inline editing
+  * Bulk actions to enable/disable overrides on multiple posts
 
 **🔒 Security Improvements**
 

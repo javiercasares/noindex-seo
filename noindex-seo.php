@@ -937,6 +937,404 @@ function noindex_seo_save_post_meta( int $post_id ): void {
 add_action( 'save_post', 'noindex_seo_save_post_meta' );
 
 /**
+ * Add custom column to post/page list showing robots directives override status.
+ *
+ * Only adds column if granular control is enabled.
+ *
+ * @since 2.0.0
+ *
+ * @param array $columns Existing columns.
+ * @return array Modified columns.
+ */
+function noindex_seo_add_custom_column( array $columns ): array {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return $columns;
+	}
+
+	// Insert column after title (or at the end if title doesn't exist).
+	$new_columns = array();
+	foreach ( $columns as $key => $value ) {
+		$new_columns[ $key ] = $value;
+		if ( 'title' === $key ) {
+			$new_columns['noindex_seo_directives'] = __( 'Robots', 'noindex-seo' );
+		}
+	}
+
+	// If title column doesn't exist, add at the end.
+	if ( ! isset( $new_columns['noindex_seo_directives'] ) ) {
+		$new_columns['noindex_seo_directives'] = __( 'Robots', 'noindex-seo' );
+	}
+
+	return $new_columns;
+}
+
+/**
+ * Display content of custom robots directives column.
+ *
+ * @since 2.0.0
+ *
+ * @param string $column  Column name.
+ * @param int    $post_id Post ID.
+ * @return void
+ */
+function noindex_seo_display_custom_column( string $column, int $post_id ): void {
+	if ( 'noindex_seo_directives' !== $column ) {
+		return;
+	}
+
+	$override = get_post_meta( $post_id, '_noindex_seo_override', true );
+
+	// Collect directive values for Quick Edit.
+	$directives_values = array(
+		'override'     => absint( $override ),
+		'noindex'      => absint( get_post_meta( $post_id, '_noindex_seo_noindex', true ) ),
+		'nofollow'     => absint( get_post_meta( $post_id, '_noindex_seo_nofollow', true ) ),
+		'noarchive'    => absint( get_post_meta( $post_id, '_noindex_seo_noarchive', true ) ),
+		'nosnippet'    => absint( get_post_meta( $post_id, '_noindex_seo_nosnippet', true ) ),
+		'noimageindex' => absint( get_post_meta( $post_id, '_noindex_seo_noimageindex', true ) ),
+	);
+
+	// Output hidden data for Quick Edit to read.
+	echo '<div class="noindex-seo-override-data hidden" ';
+	foreach ( $directives_values as $key => $value ) {
+		echo 'data-' . esc_attr( $key ) . '="' . esc_attr( $value ) . '" ';
+	}
+	echo '></div>';
+
+	if ( ! $override ) {
+		echo '<span style="color: #999;">—</span>';
+		return;
+	}
+
+	// Collect active directives for display.
+	$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+	$active     = array();
+
+	foreach ( $directives as $directive ) {
+		if ( 1 === $directives_values[ $directive ] ) {
+			$active[] = $directive;
+		}
+	}
+
+	if ( empty( $active ) ) {
+		echo '<span style="color: #999;">' . esc_html__( 'Override (none)', 'noindex-seo' ) . '</span>';
+		return;
+	}
+
+	// Display active directives as badges.
+	echo '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
+	foreach ( $active as $directive ) {
+		$emoji = '';
+		switch ( $directive ) {
+			case 'noindex':
+				$emoji = '🔍';
+				break;
+			case 'nofollow':
+				$emoji = '🔗';
+				break;
+			case 'noarchive':
+				$emoji = '💾';
+				break;
+			case 'nosnippet':
+				$emoji = '📄';
+				break;
+			case 'noimageindex':
+				$emoji = '🖼️';
+				break;
+		}
+		echo '<span style="display: inline-block; padding: 2px 6px; background: #eff6ff; border: 1px solid #667eea; border-radius: 3px; font-size: 11px; line-height: 1.2;">';
+		echo esc_html( $emoji . ' ' . $directive );
+		echo '</span>';
+	}
+	echo '</div>';
+}
+
+// Register column hooks for all public post types.
+$post_types = get_post_types( array( 'public' => true ), 'names' );
+foreach ( $post_types as $post_type ) {
+	add_filter( "manage_{$post_type}_posts_columns", 'noindex_seo_add_custom_column' );
+	add_action( "manage_{$post_type}_posts_custom_column", 'noindex_seo_display_custom_column', 10, 2 );
+}
+
+/**
+ * Add Quick Edit fields for robots directives.
+ *
+ * Displays the same directive checkboxes in Quick Edit interface.
+ *
+ * @since 2.0.0
+ *
+ * @param string $column_name Column name.
+ * @param string $post_type   Post type.
+ * @return void
+ */
+function noindex_seo_quick_edit_fields( string $column_name, string $post_type ): void {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return;
+	}
+
+	if ( 'noindex_seo_directives' !== $column_name ) {
+		return;
+	}
+
+	// Add nonce field.
+	wp_nonce_field( 'noindex_seo_quick_edit', 'noindex_seo_quick_edit_nonce' );
+	?>
+	<fieldset class="inline-edit-col-right">
+		<div class="inline-edit-col">
+			<label class="inline-edit-group">
+				<span class="title"><?php esc_html_e( 'Robots Directives', 'noindex-seo' ); ?></span>
+				<div style="padding: 5px 0;">
+					<label style="display: block; margin-bottom: 6px;">
+						<input type="checkbox" name="noindex_seo_override" value="1" id="noindex-seo-quick-edit-override">
+						<strong><?php esc_html_e( 'Override global settings', 'noindex-seo' ); ?></strong>
+					</label>
+					<div id="noindex-seo-quick-edit-directives" style="margin-left: 20px; margin-top: 8px; display: none;">
+						<label style="display: block; margin-bottom: 4px;">
+							<input type="checkbox" name="noindex_seo_noindex" value="1">
+							<?php esc_html_e( '🔍 noindex', 'noindex-seo' ); ?>
+						</label>
+						<label style="display: block; margin-bottom: 4px;">
+							<input type="checkbox" name="noindex_seo_nofollow" value="1">
+							<?php esc_html_e( '🔗 nofollow', 'noindex-seo' ); ?>
+						</label>
+						<label style="display: block; margin-bottom: 4px;">
+							<input type="checkbox" name="noindex_seo_noarchive" value="1">
+							<?php esc_html_e( '💾 noarchive', 'noindex-seo' ); ?>
+						</label>
+						<label style="display: block; margin-bottom: 4px;">
+							<input type="checkbox" name="noindex_seo_nosnippet" value="1">
+							<?php esc_html_e( '📄 nosnippet', 'noindex-seo' ); ?>
+						</label>
+						<label style="display: block; margin-bottom: 4px;">
+							<input type="checkbox" name="noindex_seo_noimageindex" value="1">
+							<?php esc_html_e( '🖼️ noimageindex', 'noindex-seo' ); ?>
+						</label>
+					</div>
+				</div>
+			</label>
+		</div>
+	</fieldset>
+
+	<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		// Toggle directives visibility when override checkbox changes
+		$('#noindex-seo-quick-edit-override').on('change', function() {
+			if ($(this).is(':checked')) {
+				$('#noindex-seo-quick-edit-directives').show();
+			} else {
+				$('#noindex-seo-quick-edit-directives').hide();
+			}
+		});
+
+		// Populate Quick Edit fields when "Edit" is clicked
+		$('#the-list').on('click', '.editinline', function() {
+			var post_id = $(this).closest('tr').attr('id').replace('post-', '');
+			var $row = $('#post-' + post_id);
+
+			// Get current values from the column (we'll use data attributes)
+			var override = $row.find('.noindex-seo-override-data').data('override');
+			var noindex = $row.find('.noindex-seo-override-data').data('noindex');
+			var nofollow = $row.find('.noindex-seo-override-data').data('nofollow');
+			var noarchive = $row.find('.noindex-seo-override-data').data('noarchive');
+			var nosnippet = $row.find('.noindex-seo-override-data').data('nosnippet');
+			var noimageindex = $row.find('.noindex-seo-override-data').data('noimageindex');
+
+			// Set checkbox values
+			$('#noindex-seo-quick-edit-override').prop('checked', override == 1);
+			$('input[name="noindex_seo_noindex"]').prop('checked', noindex == 1);
+			$('input[name="noindex_seo_nofollow"]').prop('checked', nofollow == 1);
+			$('input[name="noindex_seo_noarchive"]').prop('checked', noarchive == 1);
+			$('input[name="noindex_seo_nosnippet"]').prop('checked', nosnippet == 1);
+			$('input[name="noindex_seo_noimageindex"]').prop('checked', noimageindex == 1);
+
+			// Show/hide directives based on override
+			if (override == 1) {
+				$('#noindex-seo-quick-edit-directives').show();
+			} else {
+				$('#noindex-seo-quick-edit-directives').hide();
+			}
+		});
+	});
+	</script>
+	<?php
+}
+add_action( 'quick_edit_custom_box', 'noindex_seo_quick_edit_fields', 10, 2 );
+add_action( 'bulk_edit_custom_box', 'noindex_seo_quick_edit_fields', 10, 2 );
+
+/**
+ * Save Quick Edit data for robots directives.
+ *
+ * @since 2.0.0
+ *
+ * @param int $post_id Post ID being saved.
+ * @return void
+ */
+function noindex_seo_save_quick_edit( int $post_id ): void {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return;
+	}
+
+	// Verify nonce.
+	if ( ! isset( $_POST['noindex_seo_quick_edit_nonce'] ) ||
+		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['noindex_seo_quick_edit_nonce'] ) ), 'noindex_seo_quick_edit' ) ) {
+		return;
+	}
+
+	// Check user permissions.
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// Check if we're in Quick Edit (not regular post save).
+	if ( ! isset( $_POST['_inline_edit'] ) ) {
+		return;
+	}
+
+	// Save override and directives (same logic as save_post_meta).
+	$override = isset( $_POST['noindex_seo_override'] ) ? 1 : 0;
+	update_post_meta( $post_id, '_noindex_seo_override', $override );
+
+	if ( $override ) {
+		$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+		foreach ( $directives as $directive ) {
+			$value = isset( $_POST[ 'noindex_seo_' . $directive ] ) ? 1 : 0;
+			update_post_meta( $post_id, '_noindex_seo_' . $directive, $value );
+		}
+	} else {
+		delete_post_meta( $post_id, '_noindex_seo_noindex' );
+		delete_post_meta( $post_id, '_noindex_seo_nofollow' );
+		delete_post_meta( $post_id, '_noindex_seo_noarchive' );
+		delete_post_meta( $post_id, '_noindex_seo_nosnippet' );
+		delete_post_meta( $post_id, '_noindex_seo_noimageindex' );
+	}
+}
+add_action( 'save_post', 'noindex_seo_save_quick_edit' );
+
+/**
+ * Register custom bulk actions for robots directives.
+ *
+ * Adds "Enable Override" and "Disable Override" bulk actions.
+ *
+ * @since 2.0.0
+ *
+ * @param array $bulk_actions Existing bulk actions.
+ * @return array Modified bulk actions.
+ */
+function noindex_seo_register_bulk_actions( array $bulk_actions ): array {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return $bulk_actions;
+	}
+
+	$bulk_actions['noindex_seo_enable_override']  = __( 'Enable Robots Override', 'noindex-seo' );
+	$bulk_actions['noindex_seo_disable_override'] = __( 'Disable Robots Override', 'noindex-seo' );
+
+	return $bulk_actions;
+}
+
+/**
+ * Handle custom bulk actions for robots directives.
+ *
+ * @since 2.0.0
+ *
+ * @param string $redirect_to Redirect URL.
+ * @param string $action      Action being taken.
+ * @param array  $post_ids    Array of post IDs.
+ * @return string Modified redirect URL.
+ */
+function noindex_seo_handle_bulk_actions( string $redirect_to, string $action, array $post_ids ): string {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return $redirect_to;
+	}
+
+	if ( 'noindex_seo_enable_override' === $action ) {
+		foreach ( $post_ids as $post_id ) {
+			update_post_meta( $post_id, '_noindex_seo_override', 1 );
+		}
+		$redirect_to = add_query_arg( 'noindex_seo_bulk_enabled', count( $post_ids ), $redirect_to );
+	}
+
+	if ( 'noindex_seo_disable_override' === $action ) {
+		foreach ( $post_ids as $post_id ) {
+			update_post_meta( $post_id, '_noindex_seo_override', 0 );
+			// Also delete all directive meta.
+			delete_post_meta( $post_id, '_noindex_seo_noindex' );
+			delete_post_meta( $post_id, '_noindex_seo_nofollow' );
+			delete_post_meta( $post_id, '_noindex_seo_noarchive' );
+			delete_post_meta( $post_id, '_noindex_seo_nosnippet' );
+			delete_post_meta( $post_id, '_noindex_seo_noimageindex' );
+		}
+		$redirect_to = add_query_arg( 'noindex_seo_bulk_disabled', count( $post_ids ), $redirect_to );
+	}
+
+	return $redirect_to;
+}
+
+/**
+ * Display admin notice after bulk actions.
+ *
+ * @since 2.0.0
+ *
+ * @return void
+ */
+function noindex_seo_bulk_actions_admin_notice(): void {
+	if ( ! empty( $_REQUEST['noindex_seo_bulk_enabled'] ) ) {
+		$count = absint( $_REQUEST['noindex_seo_bulk_enabled'] );
+		printf(
+			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+			esc_html(
+				sprintf(
+					/* translators: %d: Number of posts updated */
+					_n(
+						'Robots override enabled for %d post.',
+						'Robots override enabled for %d posts.',
+						$count,
+						'noindex-seo'
+					),
+					$count
+				)
+			)
+		);
+	}
+
+	if ( ! empty( $_REQUEST['noindex_seo_bulk_disabled'] ) ) {
+		$count = absint( $_REQUEST['noindex_seo_bulk_disabled'] );
+		printf(
+			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+			esc_html(
+				sprintf(
+					/* translators: %d: Number of posts updated */
+					_n(
+						'Robots override disabled for %d post.',
+						'Robots override disabled for %d posts.',
+						$count,
+						'noindex-seo'
+					),
+					$count
+				)
+			)
+		);
+	}
+}
+add_action( 'admin_notices', 'noindex_seo_bulk_actions_admin_notice' );
+
+// Register bulk actions for all public post types.
+$post_types_bulk = get_post_types( array( 'public' => true ), 'names' );
+foreach ( $post_types_bulk as $post_type_bulk ) {
+	add_filter( "bulk_actions-edit-{$post_type_bulk}", 'noindex_seo_register_bulk_actions' );
+	add_filter( "handle_bulk_actions-edit-{$post_type_bulk}", 'noindex_seo_handle_bulk_actions', 10, 3 );
+}
+
+/**
  * Renders the modern, visual settings page for the 'noindex SEO' plugin.
  *
  * This function outputs a completely redesigned admin interface with:
