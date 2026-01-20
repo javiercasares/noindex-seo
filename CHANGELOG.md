@@ -58,6 +58,33 @@ This is a major release that includes comprehensive security hardening and a new
   - Validates and sanitizes all directives
   - Updated PHPDoc with detailed documentation
 
+#### Granular Per-Post/Page Control (Phase 1 MVP)
+- **Optional Per-Content Override System**
+  - New configuration option to enable/disable granular control (disabled by default)
+  - When enabled, meta boxes appear in post/page/CPT editors
+  - Allows overriding global settings for individual content
+  - Priority system: per-post settings override global settings
+
+- **Meta Box Interface**
+  - Sidebar meta box in post/page editor
+  - Override toggle to activate per-content control
+  - 5 directive checkboxes (noindex, nofollow, noarchive, nosnippet, noimageindex)
+  - Shows current global settings as reference
+  - Clean, intuitive UI with emoji icons
+  - JavaScript toggle for showing/hiding directive options
+
+- **Post Meta Storage**
+  - `_noindex_seo_override`: Indicates override is active
+  - `_noindex_seo_noindex`, `_noindex_seo_nofollow`, etc.: Individual directive values
+  - Automatic cleanup when override is disabled
+  - Complete cleanup on plugin uninstall
+
+- **Priority Logic in `noindex_seo_show()`**
+  - Priority 1: Check for per-post override (if granular enabled + singular context)
+  - Priority 2: Apply global settings (existing behavior)
+  - Early return when post meta takes precedence
+  - Efficient implementation with minimal performance impact
+
 ### Security
 
 #### Fixed - High Severity
@@ -233,6 +260,27 @@ This is a major release that includes comprehensive security hardening and a new
    - Only loads on the plugin's settings page for performance
    - Includes script localization for translations
    - Registered on `admin_enqueue_scripts` hook
+
+4. **`noindex_seo_add_meta_boxes()`**
+   - Registers meta boxes for granular per-post/page control
+   - Only registers if granular control is enabled in settings
+   - Adds meta box to all public post types
+   - Registered on `add_meta_boxes` hook
+
+5. **`noindex_seo_render_meta_box()`**
+   - Renders the meta box content in post/page editor
+   - Override checkbox to enable per-content settings
+   - 5 directive checkboxes with emoji icons
+   - Shows current global settings as reference
+   - Includes nonce for security
+   - JavaScript toggle for showing/hiding options
+
+6. **`noindex_seo_save_post_meta()`**
+   - Saves post meta when post is saved
+   - Validates nonce and checks user permissions
+   - Only saves meta if override is enabled
+   - Deletes meta when override is disabled
+   - Registered on `save_post` hook
 
 ### Compatibility & Migration
 

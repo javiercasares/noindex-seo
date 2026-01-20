@@ -147,6 +147,38 @@ function noindex_seo_show(): void {
 		$contexts = array();
 	}
 
+	// PRIORITY 1: Check for per-post/page override (granular control).
+	// If granular control is enabled and we're on a singular post/page,
+	// check if there's an override for this specific content.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( $granular_enabled && is_singular() ) {
+		$post_id = get_queried_object_id();
+		if ( $post_id ) {
+			$override = get_post_meta( $post_id, '_noindex_seo_override', true );
+			if ( $override ) {
+				// Collect active directives from post meta.
+				$post_directives      = array();
+				$available_directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+
+				foreach ( $available_directives as $directive ) {
+					$meta_value = get_post_meta( $post_id, '_noindex_seo_' . $directive, true );
+					// Explicitly check for 1 or '1' to avoid false positives with '0' string.
+					if ( 1 === absint( $meta_value ) ) {
+						$post_directives[] = $directive;
+					}
+				}
+
+				// Apply post-specific directives if any are enabled.
+				if ( ! empty( $post_directives ) ) {
+					$implementation_method = get_option( 'noindex_seo_config_method', 'meta' );
+					noindex_seo_metarobots( $implementation_method, $post_directives );
+					return; // Exit early - post meta takes precedence over global settings.
+				}
+			}
+		}
+	}
+
+	// PRIORITY 2: Apply global settings (existing behavior).
 	// Try to get the options from the transient.
 	$options = get_transient( 'noindex_seo_options' );
 
@@ -500,6 +532,15 @@ function noindex_seo_register(): void {
 		)
 	);
 
+	register_setting(
+		'noindexseo',
+		'noindex_seo_config_granular',
+		array(
+			'type'    => 'integer',
+			'default' => 0,
+		)
+	);
+
 	// Hook to settings update to clear transient cache..
 	// Note: Hook receives $old_value and $value parameters but we don't need them.
 	add_action( 'update_option_noindexseo', 'noindex_seo_clear_transient', 10, 0 );
@@ -688,6 +729,13 @@ function noindex_seo_process_form(): void {
 	// Save implementation method configuration (already validated above).
 	update_option( 'noindex_seo_config_method', $method_value );
 
+	// Save granular control configuration.
+	$granular_value = isset( $_POST['noindex_seo_config_granular'] )
+		? absint( $_POST['noindex_seo_config_granular'] )
+		: 0;
+	$granular_value = ( 1 === $granular_value ) ? 1 : 0;
+	update_option( 'noindex_seo_config_granular', $granular_value );
+
 	// Clear cache..
 	delete_transient( 'noindex_seo_options' );
 
@@ -695,6 +743,198 @@ function noindex_seo_process_form(): void {
 	exit;
 }
 add_action( 'admin_post_update_noindex_seo', 'noindex_seo_process_form' );
+
+/**
+ * Register meta boxes for granular per-post/page control.
+ *
+ * Only registers meta boxes if granular control is enabled in settings.
+ * Adds meta box to all public post types (posts, pages, custom post types).
+ *
+ * @since 2.0.0
+ *
+ * @return void
+ */
+function noindex_seo_add_meta_boxes(): void {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return;
+	}
+
+	// Get all public post types.
+	$post_types = get_post_types( array( 'public' => true ), 'names' );
+
+	// Add meta box to each public post type.
+	foreach ( $post_types as $post_type ) {
+		add_meta_box(
+			'noindex_seo_meta_box',
+			__( 'Search Engine Visibility', 'noindex-seo' ),
+			'noindex_seo_render_meta_box',
+			$post_type,
+			'side',
+			'default'
+		);
+	}
+}
+add_action( 'add_meta_boxes', 'noindex_seo_add_meta_boxes' );
+
+/**
+ * Render the meta box content for per-post/page control.
+ *
+ * Displays a checkbox to override global settings and 5 directive checkboxes.
+ * Shows current global settings as reference.
+ *
+ * @since 2.0.0
+ *
+ * @param WP_Post $post The current post object.
+ * @return void
+ */
+function noindex_seo_render_meta_box( WP_Post $post ): void {
+	// Add nonce for security.
+	wp_nonce_field( 'noindex_seo_meta_box', 'noindex_seo_meta_box_nonce' );
+
+	// Get current post meta values.
+	$override     = get_post_meta( $post->ID, '_noindex_seo_override', true );
+	$noindex      = get_post_meta( $post->ID, '_noindex_seo_noindex', true );
+	$nofollow     = get_post_meta( $post->ID, '_noindex_seo_nofollow', true );
+	$noarchive    = get_post_meta( $post->ID, '_noindex_seo_noarchive', true );
+	$nosnippet    = get_post_meta( $post->ID, '_noindex_seo_nosnippet', true );
+	$noimageindex = get_post_meta( $post->ID, '_noindex_seo_noimageindex', true );
+
+	// Get global settings for reference.
+	$global_directives = array();
+	$directives        = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+
+	// Determine which context applies to this post type.
+	$post_type = get_post_type( $post );
+	$context   = ( 'page' === $post_type ) ? 'page' : 'single';
+
+	foreach ( $directives as $directive ) {
+		$option_key = $directive . '_seo_' . $context;
+		if ( get_option( $option_key, 0 ) ) {
+			$global_directives[] = $directive;
+		}
+	}
+
+	?>
+	<div class="noindex-seo-meta-box">
+		<p style="margin-top: 0;">
+			<label>
+				<input type="checkbox" name="noindex_seo_override" value="1" <?php checked( 1, $override ); ?> id="noindex-seo-override-toggle">
+				<strong><?php esc_html_e( 'Override global settings', 'noindex-seo' ); ?></strong>
+			</label>
+		</p>
+
+		<p class="description" style="margin: 8px 0 12px 0; font-size: 12px; line-height: 1.4;">
+			<?php esc_html_e( 'When enabled, these directives will override the global settings for this specific content.', 'noindex-seo' ); ?>
+		</p>
+
+		<div id="noindex-seo-directives-container" style="<?php echo $override ? '' : 'display: none;'; ?>">
+			<div style="border-top: 1px solid #ddd; padding-top: 12px; margin-bottom: 12px;">
+				<label style="display: flex; align-items: center; margin-bottom: 8px;">
+					<input type="checkbox" name="noindex_seo_noindex" value="1" <?php checked( 1, $noindex ); ?> style="margin: 0 8px 0 0;">
+					<span><strong>🔍 noindex</strong> — <?php esc_html_e( 'Prevent indexing', 'noindex-seo' ); ?></span>
+				</label>
+
+				<label style="display: flex; align-items: center; margin-bottom: 8px;">
+					<input type="checkbox" name="noindex_seo_nofollow" value="1" <?php checked( 1, $nofollow ); ?> style="margin: 0 8px 0 0;">
+					<span><strong>🔗 nofollow</strong> — <?php esc_html_e( 'Prevent link following', 'noindex-seo' ); ?></span>
+				</label>
+
+				<label style="display: flex; align-items: center; margin-bottom: 8px;">
+					<input type="checkbox" name="noindex_seo_noarchive" value="1" <?php checked( 1, $noarchive ); ?> style="margin: 0 8px 0 0;">
+					<span><strong>💾 noarchive</strong> — <?php esc_html_e( 'Prevent caching', 'noindex-seo' ); ?></span>
+				</label>
+
+				<label style="display: flex; align-items: center; margin-bottom: 8px;">
+					<input type="checkbox" name="noindex_seo_nosnippet" value="1" <?php checked( 1, $nosnippet ); ?> style="margin: 0 8px 0 0;">
+					<span><strong>📄 nosnippet</strong> — <?php esc_html_e( 'Prevent snippets', 'noindex-seo' ); ?></span>
+				</label>
+
+				<label style="display: flex; align-items: center; margin-bottom: 8px;">
+					<input type="checkbox" name="noindex_seo_noimageindex" value="1" <?php checked( 1, $noimageindex ); ?> style="margin: 0 8px 0 0;">
+					<span><strong>🖼️ noimageindex</strong> — <?php esc_html_e( 'Prevent image indexing', 'noindex-seo' ); ?></span>
+				</label>
+			</div>
+		</div>
+
+		<?php if ( ! empty( $global_directives ) ) : ?>
+			<p class="description" style="margin: 8px 0 0 0; font-size: 11px; color: #666; border-top: 1px solid #f0f0f0; padding-top: 8px;">
+				<strong><?php esc_html_e( 'Current global:', 'noindex-seo' ); ?></strong>
+				<?php echo esc_html( implode( ', ', $global_directives ) ); ?>
+			</p>
+		<?php endif; ?>
+
+		<script type="text/javascript">
+		(function() {
+			var toggle = document.getElementById('noindex-seo-override-toggle');
+			var container = document.getElementById('noindex-seo-directives-container');
+			if (toggle && container) {
+				toggle.addEventListener('change', function() {
+					container.style.display = this.checked ? 'block' : 'none';
+				});
+			}
+		})();
+		</script>
+	</div>
+	<?php
+}
+
+/**
+ * Save post meta when post is saved.
+ *
+ * Validates nonce, checks user permissions, and saves the override settings.
+ * Only saves meta if override is enabled.
+ *
+ * @since 2.0.0
+ *
+ * @param int $post_id The post ID being saved.
+ * @return void
+ */
+function noindex_seo_save_post_meta( int $post_id ): void {
+	// Check if granular control is enabled.
+	$granular_enabled = get_option( 'noindex_seo_config_granular', 0 );
+	if ( ! $granular_enabled ) {
+		return;
+	}
+
+	// Verify nonce.
+	if ( ! isset( $_POST['noindex_seo_meta_box_nonce'] ) ||
+		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['noindex_seo_meta_box_nonce'] ) ), 'noindex_seo_meta_box' ) ) {
+		return;
+	}
+
+	// Check if this is an autosave.
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	// Check user permissions.
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// Check if override is enabled.
+	$override = isset( $_POST['noindex_seo_override'] ) ? 1 : 0;
+	update_post_meta( $post_id, '_noindex_seo_override', $override );
+
+	// If override is enabled, save the directive values.
+	if ( $override ) {
+		$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
+		foreach ( $directives as $directive ) {
+			$value = isset( $_POST[ 'noindex_seo_' . $directive ] ) ? 1 : 0;
+			update_post_meta( $post_id, '_noindex_seo_' . $directive, $value );
+		}
+	} else {
+		// If override is disabled, delete all directive meta.
+		delete_post_meta( $post_id, '_noindex_seo_noindex' );
+		delete_post_meta( $post_id, '_noindex_seo_nofollow' );
+		delete_post_meta( $post_id, '_noindex_seo_noarchive' );
+		delete_post_meta( $post_id, '_noindex_seo_nosnippet' );
+		delete_post_meta( $post_id, '_noindex_seo_noimageindex' );
+	}
+}
+add_action( 'save_post', 'noindex_seo_save_post_meta' );
 
 /**
  * Renders the modern, visual settings page for the 'noindex SEO' plugin.
@@ -929,6 +1169,7 @@ function noindex_seo_admin(): void {
 	// Get config options.
 	$option_config_seoplugins = get_option( 'noindex_seo_config_seoplugins', 0 );
 	$option_config_method     = get_option( 'noindex_seo_config_method', 'meta' );
+	$option_config_granular   = get_option( 'noindex_seo_config_granular', 0 );
 
 	// Define fields that only work with HTTP headers (non-HTML content).
 	$header_only_fields = array( 'attachment', 'feed', 'comment_feed' );
@@ -1032,6 +1273,27 @@ function noindex_seo_admin(): void {
 						</select>
 						<p style="margin: 8px 0 0 0; font-size: 13px; color: #92400e; line-height: 1.5;">
 							<?php esc_html_e( 'Choose how noindex directives are sent to search engines. Meta tags work for HTML pages. HTTP headers work for all content types including PDFs, images, and feeds.', 'noindex-seo' ); ?>
+						</p>
+					</div>
+				</div>
+
+				<div class="noindex-seo-config-option" style="margin-top: 20px;">
+					<label class="noindex-seo-switch">
+						<input
+							type="checkbox"
+							id="noindex_seo_config_granular"
+							name="noindex_seo_config_granular"
+							value="1"
+							<?php checked( 1, $option_config_granular ); ?>
+						>
+						<span class="noindex-seo-slider"></span>
+					</label>
+					<div style="flex: 1;">
+						<label for="noindex_seo_config_granular" style="display: block; font-weight: 600; color: #1e40af;">
+							<?php esc_html_e( 'Enable per-post/page granular control', 'noindex-seo' ); ?>
+						</label>
+						<p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; line-height: 1.5;">
+							<?php esc_html_e( 'When enabled, a meta box will appear in the post/page editor allowing you to override global settings for individual content. Useful for specific pages that need different robots directives.', 'noindex-seo' ); ?>
 						</p>
 					</div>
 				</div>

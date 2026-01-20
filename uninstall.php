@@ -58,6 +58,7 @@ foreach ( $contexts as $context ) {
 // Delete configuration options.
 delete_option( 'noindex_seo_config_seoplugins' );
 delete_option( 'noindex_seo_config_method' );
+delete_option( 'noindex_seo_config_granular' );
 delete_option( 'noindex_seo_config_version' );
 
 // Delete transient cache.
@@ -78,4 +79,12 @@ foreach ( $directives as $directive ) {
 // Clean up transients.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_noindex_seo_%'" );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_noindex_seo_%'" );
+
+// Clean up post meta (granular control).
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_override'" );
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_noindex'" );
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_nofollow'" );
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_noarchive'" );
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_nosnippet'" );
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_noindex_seo_noimageindex'" );
 // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
