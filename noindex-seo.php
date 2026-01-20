@@ -6,10 +6,10 @@
  * Requires at least: 6.6
  * Requires PHP: 7.2
  * Version: 2.0.0
- * Author: Javier Casares
- * Author URI: https://www.javiercasares.com/
- * License: GPL-2.0-or-later
- * License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
+ * Author: ROBOTSTXT
+ * Author URI: https://www.robotstxt.es/
+ * License: GPL-3.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.txt
  * Text Domain: noindex-seo
  * Domain Path: /languages
  *

@@ -6,10 +6,10 @@ Tested up to: 6.9
 Stable tag: 2.0.0
 Requires PHP: 7.2
 Version: 2.0.0
-License: GPL-2.0-or-later
-License URI: https://spdx.org/licenses/GPL-2.0-or-later.html
+License: GPL-3.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-Control search engine indexing with 5 robots directives using HTML meta tags or HTTP headers.
+Control search engine indexing with robots directives using HTML meta tags or HTTP headers.
 
 == Description ==
 
@@ -109,14 +109,12 @@ Extract the contents of the ZIP and upload the contents to the `/wp-content/plug
 
 == Compatibility ==
 
-* WordPress: 4.1 - 6.8
-* PHP: 5.6 - 8.4
+* WordPress: 6.6 - 6.9
+* PHP: 7.2 - 8.5
 
 == Changelog ==
 
 = 2.0.0 [2026-01-20] =
-
-**Major Feature & Security Release**
 
 **New Features**
 
@@ -135,12 +133,7 @@ Extract the contents of the ZIP and upload the contents to the `/wp-content/plug
 
 **Security & Code Quality**
 
-* Comprehensive security audit with 99/100 score
-* Enhanced input sanitization and output escaping
-* Added capability checks in all admin functions
-* SQL queries use prepared statements throughout
 * Modernized code with PHP 7.2+ strict types and type declarations
-* Follows WordPress Coding Standards 100%
 
 **Compatibility & Migration**
 
@@ -149,16 +142,6 @@ Extract the contents of the ZIP and upload the contents to the `/wp-content/plug
 * Automatic migration from v1.x (your existing settings are preserved)
 * No manual configuration needed - just update and go
 * Fully backward compatible
-
-**Technical Improvements**
-
-* Performance optimizations with transient caching
-* Enhanced wp_robots filter integration (priority 99)
-* Improved UI/UX with collapsible cards and search functionality
-* Complete uninstall cleanup for all data
-* Fallback to meta tags if headers can't be sent
-
-For detailed changelog, see [CHANGELOG.md](https://github.com/javiercasares/noindex-seo/blob/main/CHANGELOG.md)
 
 = 1.2.0 [2025-04-08] =
 
