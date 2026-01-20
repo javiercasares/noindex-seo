@@ -69,7 +69,7 @@ function noindex_seo_metarobots( string $method = 'meta', array $directives = ar
 	}
 
 	// Add HTML meta tag if requested, or as fallback if headers already sent.
-	$use_meta = in_array( $method, array( 'meta', 'both' ), true );
+	$use_meta        = in_array( $method, array( 'meta', 'both' ), true );
 	$fallback_needed = in_array( $method, array( 'header', 'both' ), true ) && ! $header_sent;
 
 	if ( $use_meta || $fallback_needed ) {
@@ -1489,11 +1489,15 @@ function noindex_seo_handle_bulk_actions( string $redirect_to, string $action, a
 		// Delete all directive meta for selected posts.
 		$directives = array( 'noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex' );
 		foreach ( $directives as $directive ) {
+			// Build parameter array: meta_key + post IDs.
+			$prepare_params = array_merge(
+				array( '_noindex_seo_' . $directive ),
+				$post_ids
+			);
 			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_fill( 0, count( $post_ids ), '%d' ) ) . ')',
-					'_noindex_seo_' . $directive,
-					...$post_ids
+					...$prepare_params
 				)
 			);
 		}
